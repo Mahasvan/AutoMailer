@@ -1,0 +1,19 @@
+---subject---
+Group Email Test: HTML + Plain Text
+
+---text---
+Hi everyone,
+
+This is a test email sent to multiple recipients using Python.
+
+Cheers,  
+Python Mail Bot
+
+---html---
+<html>
+  <body>
+    <h2>Hi everyone</h2>
+    <p>This is a <b>group email</b> sent using Python's smtplib.</p>
+    <p>Hope you're having a great day!</p>
+  </body>
+</html>
