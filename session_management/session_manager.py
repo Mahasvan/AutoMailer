@@ -1,14 +1,17 @@
 import sqlite3
 from tabulate import tabulate
 import datetime
+from typing import List, Dict, Optional, Any
 
 class SessionManager:
-    def __init__(self, db_path='automailer.db'):
+    def __init__(self, db_path: str = 'automailer.db') -> None:
+        #Initialize connection
         self.conn = sqlite3.connect(db_path)
         self.db_path = db_path
         self._create_db()
 
-    def _create_db(self):
+    #Create the tables if they don't exist
+    def _create_db(self) -> None:
         cursor = self.conn.cursor()
 
         cursor.execute('''
@@ -29,20 +32,13 @@ class SessionManager:
 
         self.conn.commit()
 
-    def _hash_recipient(self, session_id, recipient):
+    #Creates the primary key of the Recipients table
+    def _hash_recipient(self, session_id: int, recipient: Dict[str, Any]) -> str:
         recipient['session_id'] = session_id
         return str(recipient)
     
-    def start_session(self,
-                        sender_email: str, password: str,
-                        recipients: list[dict[str, str]], 
-                        subject_template: str, 
-                        text_template: str = None,
-                        html_template: str = None, 
-                        attachment_paths: list[str] = None, 
-                        cc: list[str] = None, 
-                        bcc: list[str] = None,
-                        provider: str = "gmail"):
+    #Start a new session
+    def start_session(self,recipients: List[Dict[str, str]]) -> int:
         cursor = self.conn.cursor()
         start_time = datetime.datetime.now()
         cursor.execute("INSERT INTO Sessions (start_time) VALUES (?)",(start_time,))
@@ -58,7 +54,8 @@ class SessionManager:
         self.conn.commit()
         return session_id
     
-    def continue_session(self, session_id):
+    #Filter the recipients whose email wasn't sent in the previous run
+    def continue_session(self, session_id: int) -> List[Dict[str, str]]:
         cursor = self.conn.cursor()
 
         cursor.execute("SELECT r_hash FROM Recipients WHERE session_id = ? AND status = 'Pending",(session_id,))
@@ -73,7 +70,8 @@ class SessionManager:
 
         return recipients_list
     
-    def retry_failed(self,session_id):
+    #Filter recipients whose email failed in the previous run
+    def retry_failed(self, session_id: int) -> List[Dict[str, str]]:
         cursor = self.conn.cursor()
         cursor.execute("SELECT r_hash FROM Recipients WHERE session_id = ? AND status = 'Failed",(session_id,))
         recipients = cursor.fetchall()
@@ -87,14 +85,11 @@ class SessionManager:
 
         return recipients_list        
     
-    def show_sessions(self):
+    #Returns a table of all sessions
+    def show_sessions(self) -> str:
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM Sessions")
         sessions = cursor.fetchall()
 
         table = tabulate(sessions)
         return table
-
-
-
-
