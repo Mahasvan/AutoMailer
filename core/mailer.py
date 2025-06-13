@@ -1,5 +1,4 @@
 import smtplib
-import csv
 import re
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
