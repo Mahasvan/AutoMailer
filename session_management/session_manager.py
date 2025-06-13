@@ -42,7 +42,7 @@ class SessionManager:
         cursor = self.conn.cursor()
         start_time = datetime.datetime.now()
         cursor.execute("INSERT INTO Sessions (start_time) VALUES (?)",(start_time,))
-        session_id = cursor.lastrowid
+        session_id = int(cursor.lastrowid)
 
         for rec in recipients:
             r_hash = self._hash_recipient(session_id,rec)
@@ -58,7 +58,7 @@ class SessionManager:
     def continue_session(self, session_id: int) -> List[Dict[str, str]]:
         cursor = self.conn.cursor()
 
-        cursor.execute("SELECT r_hash FROM Recipients WHERE session_id = ? AND status = 'Pending",(session_id,))
+        cursor.execute("SELECT r_hash FROM Recipients WHERE session_id = ? AND status = 'Pending'",(session_id,))
         recipients = cursor.fetchall()
 
         recipients_list = []
@@ -73,7 +73,7 @@ class SessionManager:
     #Filter recipients whose email failed in the previous run
     def retry_failed(self, session_id: int) -> List[Dict[str, str]]:
         cursor = self.conn.cursor()
-        cursor.execute("SELECT r_hash FROM Recipients WHERE session_id = ? AND status = 'Failed",(session_id,))
+        cursor.execute("SELECT r_hash FROM Recipients WHERE session_id = ? AND status = 'Failed'",(session_id,))
         recipients = cursor.fetchall()
 
         recipients_list = []
@@ -83,7 +83,17 @@ class SessionManager:
             del r['session_id']
             recipients_list.append(r)
 
-        return recipients_list        
+        return recipients_list     
+
+    #Update the status of a recipient
+    def update_status(self, recipient: Dict[str, str], session_id: int, status: str) -> None:
+        cursor = self.conn.cursor()
+        r_hash = self._hash_recipient(session_id, recipient)
+        cursor.execute(
+            "UPDATE Recipients SET status = ? WHERE r_hash = ?",
+            (status, r_hash)
+        )
+        self.conn.commit()    
     
     #Returns a table of all sessions
     def show_sessions(self) -> str:
@@ -91,5 +101,5 @@ class SessionManager:
         cursor.execute("SELECT * FROM Sessions")
         sessions = cursor.fetchall()
 
-        table = tabulate(sessions)
-        return table
+        table = tabulate(sessions) #to be implemented natively
+        return table 
