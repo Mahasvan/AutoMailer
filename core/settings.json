@@ -1,0 +1,4 @@
+{
+  "gmail": ["smtp.gmail.com", 587],
+  "outlook": ["smtp.office365.com", 587]
+}
