@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import json
-
+from template import Template
 
 class MailSender:
     def __init__(self, sender_email: str, password: str, provider: str = "gmail") -> None:
@@ -27,11 +27,6 @@ class MailSender:
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return re.match(pattern, email)
 
-    #Substitute the placeholders in the template with recipient data
-    def _fill_template(self, template: str, row: dict[str, str]) -> str:
-        for key, value in row.items():
-            template = template.replace(f"{{{{{key}}}}}", value)
-        return template
 
     #Sending the email
     def send_individual_mail(
@@ -92,21 +87,19 @@ class MailSender:
     def send_bulk_mail(
         self, 
         recipients: list[dict[str, str]], 
-        subject_template: str, 
-        text_template: str = None,
-        html_template: str = None, 
+        template: Template,
         attachment_paths: list[str] = None, 
         cc: list[str] = None, 
         bcc: list[str] = None):
         
-        if not text_template and not html_template:
+        if not template.text and not template.html:
             raise ValueError("At least one template must be provided.")
         
         for row in recipients:
             to_email = row["email"]
-            subject = self._fill_template(subject_template, row)
-            text = self._fill_template(text_template, row) if text_template else None
-            html = self._fill_template(html_template, row) if html_template else None
+            subject = template.render_subject(row)
+            text = template.render_text(row)
+            html =  template.render_html(row)
             
             self.send_individual_mail(
                 to_email=to_email,
@@ -117,5 +110,3 @@ class MailSender:
                 cc=cc,
                 bcc=bcc
             )
-            
-           
