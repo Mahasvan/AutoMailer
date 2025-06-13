@@ -10,6 +10,3 @@ def load_template(f_path:  str) -> tuple[str, str, str]:
             raise ValueError('invalid template')
         
     return subject,text,html
-
-if __name__ == '__main__':
-    print(load_template(r'template/template.txt'))
