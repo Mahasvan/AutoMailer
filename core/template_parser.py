@@ -1,4 +1,4 @@
-def load_template(f_path):
+def load_template(f_path:  str) -> tuple[str, str, str]:
     with open(f_path) as f:
         subject = text = html = None
         content = f.read()

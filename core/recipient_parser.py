@@ -1,7 +1,7 @@
 import csv
 import re
 
-def load_recipients(f_path):
+def load_recipients(f_path: str) -> list[str]:
     recipients = []
     with open(f_path, newline = '', encoding='utf-8-sig') as f:
         reader = csv.reader(f)
