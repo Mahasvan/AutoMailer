@@ -1,7 +1,7 @@
-from core.mailer import MailSender
-from session_management.session_manager import SessionManager
+from AutoMailer.core.mailer import MailSender
+from AutoMailer.session_management.session_manager import SessionManager
 from typing import List, Dict
-from core.template import Template
+from AutoMailer.core.template import Template
 
 
 class AutoMailer:
@@ -15,11 +15,11 @@ class AutoMailer:
         self,
         recipients: List[Dict[str, str]],
         subject_template: str,
-        text_template: str = None,
-        html_template: str = None,
-        attachment_paths: List[str] = None,
-        cc: List[str] = None,
-        bcc: List[str] = None
+        text_template: str | None = None,
+        html_template: str | None = None,
+        attachment_paths: List[str] | None = None,
+        cc: List[str] | None = None,
+        bcc: List[str] | None = None
     ) -> int:
         session_id = self.session_manager.start_session(recipients)
         
