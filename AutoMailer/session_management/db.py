@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import datetime
 from typing import List, Dict, Any
 import os
-from AutoMailer.config import db_folder
+from AutoMailer.config import DB_FOLDER
 
 class Database:
     _instance = None
@@ -17,15 +17,10 @@ class Database:
 
         return Database._instance
     
-    def __init__(self, dbfile: str):
-        dbfile = os.path.join(os.getcwd(), db_folder, dbfile)
-        # print(f"Database file path: {dbfile}")
-        if not os.path.exists(folder := os.path.dirname(dbfile)):
-            # print(f"Database folder does not exist: {folder}. Creating it now.")
-            os.makedirs(folder)
-            # print(f"Created database folder: {folder}")
+    def __init__(self, dbfile_path: str):
+
         
-        self.engine = create_engine(f"sqlite:///{dbfile}")
+        self.engine = create_engine(f"sqlite:///{dbfile_path}")
         self.engine.connect()
         self.meta = db.MetaData()
 
