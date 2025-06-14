@@ -2,104 +2,50 @@ import sqlite3
 from tabulate import tabulate
 import datetime
 from typing import List, Dict, Optional, Any
+from AutoMailer.session_management.db import Database
+from AutoMailer.utils.strings import get_os_safe_name
+import os
+from AutoMailer.config import DB_FOLDER
 
 class SessionManager:
-    def __init__(self, db_path: str = 'automailer.db') -> None:
+    def __init__(self, session_name: str) -> None:
         #Initialize connection
-        self.conn = sqlite3.connect(db_path)
-        self.db_path = db_path
-        self._create_db()
+        self.session_name = session_name
+        self.session_name_os_safe = get_os_safe_name(session_name)
+        
+        self.dbname = self.session_name_os_safe + ".db"
+        
+        
+        db_folder_path = os.path.join(os.getcwd(), DB_FOLDER)
+        if not os.path.exists(folder := db_folder_path):
+            os.makedirs(folder)
 
-    #Create the tables if they don't exist
-    def _create_db(self) -> None:
-        cursor = self.conn.cursor()
+        self.dbfile_path = os.path.join(db_folder_path, self.dbname)
+        
+        if os.path.exists(self.dbfile_path):
+            print(f"Using existing database file: {self.dbfile_path}")
+        else:
+            print(f"Creating new database file: {self.dbfile_path}")
+        
+        #Initialize database
+        self.db = Database(self.dbfile_path)
 
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS Sessions (
-                session_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                start_time TEXT
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS Recipients (
-                r_hash TEXT PRIMARY KEY,
-                session_id INTEGER,
-                status TEXT,
-                FOREIGN KEY(session_id) REFERENCES Sessions(session_id)
-            )
-        ''')
-
-        self.conn.commit()
-
-    #Creates the primary key of the Recipients table
-    def _hash_recipient(self, session_id: int, recipient: Dict[str, Any]) -> str:
-        recipient['session_id'] = session_id
+    def _hash_recipient(self, recipient: Dict[str, Any]) -> str:
         return str(recipient)
     
-    #Start a new session
-    def start_session(self,recipients: List[Dict[str, str]]) -> int:
-        cursor = self.conn.cursor()
-        start_time = datetime.datetime.now()
-        cursor.execute("INSERT INTO Sessions (start_time) VALUES (?)",(start_time,))
-        session_id = int(cursor.lastrowid)
-
-        for rec in recipients:
-            r_hash = self._hash_recipient(session_id,rec)
-            cursor.execute(
-                "INSERT INTO Recipients (r_hash,session_id,status) VALUES (?,?,?)",
-                (r_hash,session_id,'Pending')
-            )
-
-        self.conn.commit()
-        return session_id
-    
     #Filter the recipients whose email wasn't sent in the previous run
-    def continue_session(self, session_id: int) -> List[Dict[str, str]]:
-        cursor = self.conn.cursor()
-
-        cursor.execute("SELECT r_hash FROM Recipients WHERE session_id = ? AND status = 'Pending'",(session_id,))
-        recipients = cursor.fetchall()
-
-        recipients_list = []
-        for rec in recipients:
-            r = rec[0]
-            r = eval(r)
-            del r['session_id']
-            recipients_list.append(r)
-
-        return recipients_list
+    def _filter_unsent_recipients(self, session_id: int, recipients: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        unsent_recipients = []
+        for recipient in recipients:
+            recipient_hash = self._hash_recipient(recipient)
+            if not self.db.check_recipient_sent(recipient_hash):
+                unsent_recipients.append(recipient)
+        return unsent_recipients
     
-    #Filter recipients whose email failed in the previous run
-    def retry_failed(self, session_id: int) -> List[Dict[str, str]]:
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT r_hash FROM Recipients WHERE session_id = ? AND status = 'Failed'",(session_id,))
-        recipients = cursor.fetchall()
-
-        recipients_list = []
-        for rec in recipients:
-            r = rec[0]
-            r = eval(r)
-            del r['session_id']
-            recipients_list.append(r)
-
-        return recipients_list     
-
-    #Update the status of a recipient
-    def update_status(self, recipient: Dict[str, str], session_id: int, status: str) -> None:
-        cursor = self.conn.cursor()
-        r_hash = self._hash_recipient(session_id, recipient)
-        cursor.execute(
-            "UPDATE Recipients SET status = ? WHERE r_hash = ?",
-            (status, r_hash)
-        )
-        self.conn.commit()    
+    def get_sent_recipients(self) -> List[Dict[str, Any]]:
+        return self.db.get_sent_recipients()
     
-    #Returns a table of all sessions
-    def show_sessions(self) -> str:
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM Sessions")
-        sessions = cursor.fetchall()
-
-        table = tabulate(sessions) #to be implemented natively
-        return table 
+    def add_recipient(self, recipient: Dict[str, Any]) -> None:
+        recipient_hash = self._hash_recipient(recipient)
+        if not self.db.check_recipient_sent(recipient_hash):
+            self.db.insert_recipient(recipient_hash)

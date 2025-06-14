@@ -1,1 +1,1 @@
-db_folder = "mail_sessions"
+DB_FOLDER = "mail_sessions"
