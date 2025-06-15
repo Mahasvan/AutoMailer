@@ -5,6 +5,7 @@ import datetime
 from typing import List, Dict, Any
 import os
 from AutoMailer.config import DB_FOLDER
+from AutoMailer.utils.logger import logger
 
 class Database:
     _instance = None
@@ -18,8 +19,7 @@ class Database:
         return Database._instance
     
     def __init__(self, dbfile_path: str):
-
-        
+        logger.info(f"Initializing database at {dbfile_path}")
         self.engine = create_engine(f"sqlite:///{dbfile_path}")
         self.engine.connect()
         self.meta = db.MetaData()
@@ -41,6 +41,7 @@ class Database:
             command = self._sent.insert().values(recipient_hash=recipient_hash, sent_time=datetime.datetime.now())
             result = session.execute(command)
             session.commit()
+            logger.info(f"Recipient {recipient_hash} inserted successfully.")
             return result.lastrowid
 
     def check_recipient_sent(self, recipient_hash: str) -> bool:
@@ -50,6 +51,7 @@ class Database:
             return result is not None
     
     def get_sent_recipients(self) -> List[Dict[str, Any]]:
+        logger.info("Fetching all sent recipients from database.")
         with Session(self.engine) as session:
             query = self._sent.select()
             columns = [col.name for col in self._sent.columns]  # Get column names from the table
@@ -57,13 +59,16 @@ class Database:
             return [dict(zip(columns, row)) for row in query_result]
         
     def delete_recipient(self, recipient_hash: str) -> None:
+        logger.info(f"Trying to delete recipient with hash {recipient_hash}.")
         if not self.check_recipient_sent(recipient_hash):
+            logger.error(f"{recipient_hash} not found. Cannot delete.")
             raise ValueError(f"Recipient with hash {recipient_hash} not found in the database.")
     
         with Session(self.engine) as session:
             command = self._sent.delete().where(self._sent.c.recipient_hash == recipient_hash)
             session.execute(command)
             session.commit()
+            logger.info(f"{recipient_hash} deleted successfully.")
     
     def clear_database(self) -> None:
         with Session(self.engine) as session:
@@ -71,9 +76,11 @@ class Database:
             session.execute(command)
             session.commit()
         self._create_tables()  # Recreate the table structure after clearing
+        logger.info("Database cleared and table structure recreated.")
     
     def close(self) -> None:
         if self.engine:
+            logger.info("Closing database connection and disposing engine.")
             self.engine.dispose()
             self.engine = None
             self.meta = None
@@ -81,4 +88,4 @@ class Database:
     
     def __del__(self):
         self.close()
-        print("Database connection closed.")
+        logger.info("Database connection closed.")

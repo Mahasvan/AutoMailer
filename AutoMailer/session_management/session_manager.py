@@ -4,6 +4,7 @@ from AutoMailer.session_management.db import Database
 from AutoMailer.utils.strings import get_os_safe_name
 import os
 from AutoMailer.config import DB_FOLDER
+from AutoMailer.utils.logger import logger
 
 class SessionManager:
     def __init__(self, session_name: str) -> None:
@@ -21,9 +22,9 @@ class SessionManager:
         self.dbfile_path = os.path.join(db_folder_path, self.dbname)
         
         if os.path.exists(self.dbfile_path):
-            print(f"Using existing database file: {self.dbfile_path}")
+            logger.info(f"Using existing database file: {self.dbfile_path}")
         else:
-            print(f"Creating new database file: {self.dbfile_path}")
+            logger.info(f"Creating new database file: {self.dbfile_path}")
         
         #Initialize database
         self.db = Database(self.dbfile_path)

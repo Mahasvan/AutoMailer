@@ -7,12 +7,14 @@ from email.mime.application import MIMEApplication
 import json
 from AutoMailer.core.template import Template
 from AutoMailer.session_management.session_manager import SessionManager
+from AutoMailer.utils.logger import logger
 
 class MailSender:
     def __init__(self, sender_email: str, password: str, provider: str = "gmail") -> None:
         self.sender_email = sender_email
         self.password = password
         self.smtp_server, self.smtp_port = self._get_settings(provider)
+        logger.info(f"MailSender initialized for {sender_email} using {provider} provider.")
 
     def _get_settings(self, provider: str) -> tuple[str, int]:
         settings_path = os.path.join(os.path.dirname(__file__), "settings.json")
@@ -20,6 +22,7 @@ class MailSender:
             settings = json.load(f)
 
         if provider not in settings:
+            logger.error(f"Provider '{provider}' not found in settings.")
             raise ValueError("Invalid provider.")
         return tuple(settings[provider])
 
@@ -39,6 +42,7 @@ class MailSender:
     ) -> bool:
 
         if not text_content and not html_content:
+            logger.warning("Attempted to send an email with no content.")
             raise ValueError("At least one content type must be provided.")
 
         msg = MIMEMultipart("alternative")
@@ -61,7 +65,7 @@ class MailSender:
                         part['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
                         msg.attach(part)
                 except Exception as e:
-                    print(f"Couldn't attach file {file_path}: {e}")
+                    logger.warning(f"Couldn't attach file '{file_path}': {e}")
                     return False
 
         try:
@@ -73,11 +77,11 @@ class MailSender:
                     [to_email] + (cc or []) + (bcc or []),
                     msg.as_string()
                 )
-                print(f"Email sent to {to_email}")
+                logger.info(f"Email sent to {to_email}")
                 return True
 
         except Exception as e:
-            print(f"Couldn't send email to {to_email}: {e}")
+            logger.error(f"Couldn't send email to {to_email}: {e}")
             return False
 
     def send_bulk_mail(
@@ -90,6 +94,7 @@ class MailSender:
         session_manager: SessionManager = None
     ):
         if not template.text and not template.html:
+            logger.error("Both text and HTML templates are missing.")
             raise ValueError("At least one template must be provided.")
 
         for row in recipients:
@@ -110,3 +115,6 @@ class MailSender:
 
             if sent and session_manager:
                 session_manager.add_recipient(row)
+
+            if not sent:
+                logger.warning(f"Couldn't send email to {to_email}.")
