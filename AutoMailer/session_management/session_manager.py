@@ -1,7 +1,5 @@
-import sqlite3
 from tabulate import tabulate
-import datetime
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Any
 from AutoMailer.session_management.db import Database
 from AutoMailer.utils.strings import get_os_safe_name
 import os
