@@ -13,8 +13,6 @@ class SessionManager:
         self.session_name_os_safe = get_os_safe_name(session_name)
         
         self.dbname = self.session_name_os_safe + ".db"
-        
-        
         db_folder_path = os.path.join(os.getcwd(), DB_FOLDER)
         if not os.path.exists(folder := db_folder_path):
             os.makedirs(folder)
@@ -30,6 +28,7 @@ class SessionManager:
         self.db = Database(self.dbfile_path)
 
     def _hash_recipient(self, recipient: Dict[str, Any]) -> str:
+        recipient['session_name'] = self.session_name_os_safe
         return str(recipient)
     
     #Filter the recipients whose email wasn't sent in the previous run
