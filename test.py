@@ -1,8 +1,6 @@
-from AutoMailer.session_management.db import Database
-from AutoMailer.session_management.session_manager import SessionManager
+from AutoMailer import AutoMailer, MailSender, Template
 import json
 from pprint import pprint
-from AutoMailer.automailer import AutoMailer
 
 # db = Database("test.db")
 
