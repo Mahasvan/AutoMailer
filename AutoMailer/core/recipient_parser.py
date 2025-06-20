@@ -16,6 +16,7 @@ def load_recipients(f_path: str) -> list[str]:
 
             recipients.append(line)
     print(recipients)
+    return recipients
 
 
 if __name__ == '__main__':
