@@ -1,7 +1,7 @@
 from AutoMailer.core.mailer import MailSender
 from AutoMailer.core.template import Template
 from AutoMailer.session_management.session_manager import SessionManager
-from typing import List, Dict
+from typing import List, Dict, Optional
 from AutoMailer.utils.logger import logger
 
 class AutoMailer:
@@ -14,16 +14,16 @@ class AutoMailer:
         self,
         recipients: List[Dict[str, str]],
         subject_template: str,
-        text_template: str = None,
-        html_template: str = None,
-        attachment_paths: List[str] = None,
-        cc: List[str] = None,
-        bcc: List[str] = None
+        text_template: Optional[str] = None,
+        html_template: Optional[str] = None,
+        attachment_paths: Optional[List[str]] = None,
+        cc: Optional[List[str]] = None,
+        bcc: Optional[List[str]] = None
     ):
         logger.info(f"Preparing to send emails to {len(recipients)} recipients.")
         template = Template(subject_template, text_template, html_template)
 
-        unsent = self.session_manager._filter_unsent_recipients(None, recipients)
+        unsent = self.session_manager._filter_unsent_recipients(self.session_manager.get_current_session_id(), recipients)
 
         if not unsent:
             logger.info("All recipients already emailed.")

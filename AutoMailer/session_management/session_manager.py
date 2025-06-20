@@ -32,7 +32,7 @@ class SessionManager:
         return str(recipient)
     
     #Filter the recipients whose email wasn't sent in the previous run
-    def _filter_unsent_recipients(self, session_id: int, recipients: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _filter_unsent_recipients(self, session_id: str, recipients: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         unsent_recipients = []
         for recipient in recipients:
             recipient_hash = self._hash_recipient(recipient)
@@ -47,3 +47,5 @@ class SessionManager:
         recipient_hash = self._hash_recipient(recipient)
         if not self.db.check_recipient_sent(recipient_hash):
             self.db.insert_recipient(recipient_hash)
+    def get_current_session_id(self) -> str:
+        return self.session_name_os_safe
