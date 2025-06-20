@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import json
+from typing import Optional, Any
 from AutoMailer.core.template import Template
 from AutoMailer.session_management.session_manager import SessionManager
 from AutoMailer.utils.logger import logger
@@ -19,26 +20,26 @@ class MailSender:
     def _get_settings(self, provider: str) -> tuple[str, int]:
         settings_path = os.path.join(os.path.dirname(__file__), "settings.json")
         with open(settings_path, 'r') as f:
-            settings = json.load(f)
+            settings: dict[str, list[Any]] = json.load(f)
 
         if provider not in settings:
             logger.error(f"Provider '{provider}' not found in settings.")
             raise ValueError("Invalid provider.")
-        return tuple(settings[provider])
+        return tuple(settings[provider])  # type: ignore
 
     def _validate_email(self, email: str) -> bool:
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        return re.match(pattern, email)
+        return re.match(pattern, email) is not None
 
     def send_individual_mail(
         self,
         to_email: str,
         subject: str,
-        text_content: str = None,
-        html_content: str = None,
-        attachment_paths: list[str] = None,
-        cc: list[str] = None,
-        bcc: list[str] = None,
+        text_content: Optional[str] = None,
+        html_content: Optional[str] = None,
+        attachment_paths: Optional[list[str]] = None,
+        cc: Optional[list[str]] = None,
+        bcc: Optional[list[str]] = None,
     ) -> bool:
 
         if not text_content and not html_content:
@@ -88,11 +89,11 @@ class MailSender:
         self,
         recipients: list[dict[str, str]],
         template: Template,
-        attachment_paths: list[str] = None,
-        cc: list[str] = None,
-        bcc: list[str] = None,
-        session_manager: SessionManager = None
-    ):
+        attachment_paths: Optional[list[str]] = None,
+        cc: Optional[list[str]] = None,
+        bcc: Optional[list[str]] = None,
+        session_manager: Optional[SessionManager] = None
+    ) -> None:
         if not template.text and not template.html:
             logger.error("Both text and HTML templates are missing.")
             raise ValueError("At least one template must be provided.")
