@@ -30,6 +30,7 @@ AutoMailer
 - Python 3.10+
 - `sqlalchemy`
 - `tabulate`
+- `pydantic`
 
 ## Quick Start
 

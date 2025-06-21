@@ -1,23 +1,23 @@
-from typing import Optional
+from typing import Optional, Dict
+from pydantic import BaseModel
 
-class Template:
-    def __init__(self, subject: str, text: Optional[str] = None, html: Optional[str] = None):
-        self.subject = subject
-        self.text = text
-        self.html = html
+class Template(BaseModel):
+    subject: str
+    text: Optional[str] = None
+    html: Optional[str] = None
 
-    def _fill(self, template: Optional[str], row: dict[str, str]) -> Optional[str]:
+    def _fill(self, template: Optional[str], row: Dict[str, str]) -> Optional[str]:
         if not template:
             return None
         for key, value in row.items():
             template = template.replace(f"{{{{{key}}}}}", value)
         return template
 
-    def render_subject(self, row: dict[str, str]) -> str:
+    def render_subject(self, row: Dict[str, str]) -> str:
         return self._fill(self.subject, row) or ""
 
-    def render_text(self, row: dict[str, str]) -> str:
+    def render_text(self, row: Dict[str, str]) -> str:
         return self._fill(self.text, row) or ""
 
-    def render_html(self, row: dict[str, str]) -> str:
+    def render_html(self, row: Dict[str, str]) -> str:
         return self._fill(self.html, row) or ""

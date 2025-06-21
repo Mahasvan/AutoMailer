@@ -48,14 +48,14 @@ automailer1 = AutoMailer(
     sender_email="sender@gmail.com",
     password="password",
     provider="gmail",
-    session_name="plsworksob10"
+    session_name="test1"
 )
 
 automailer2 = AutoMailer(
     sender_email="sender@gmail.com",
     password="password",
     provider="gmail",
-    session_name="plsworksob20"
+    session_name="test2"
 )
 
 automailer1.send_emails(
