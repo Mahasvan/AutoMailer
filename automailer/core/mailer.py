@@ -29,7 +29,8 @@ class MailSender:
             logger.error(f"Provider '{provider}' not found in settings.")
             raise ValueError("Invalid provider.")
         return tuple(settings[provider])  # type: ignore
-
+    
+    #check email format using regex
     def _validate_email(self, email: str) -> bool:
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return re.match(pattern, email) is not None
