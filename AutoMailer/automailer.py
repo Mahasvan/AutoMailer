@@ -1,8 +1,8 @@
-from AutoMailer.core.mailer import MailSender
-from AutoMailer.core.template import Template
-from AutoMailer.session_management.session_manager import SessionManager
+from automailer.core.mailer import MailSender
+from automailer.core.template import Template
+from automailer.session_management.session_manager import SessionManager
 from typing import List, Dict, Optional
-from AutoMailer.utils.logger import logger
+from automailer.utils.logger import logger
 
 class AutoMailer:
     def __init__(self, sender_email: str, password: str, provider: str, session_name: str):
@@ -21,7 +21,7 @@ class AutoMailer:
         bcc: Optional[List[str]] = None
     ):
         logger.info(f"Preparing to send emails to {len(recipients)} recipients.")
-        template = Template(subject_template, text_template, html_template)
+        template = Template(subject=subject_template, text=text_template, html=html_template)
 
         unsent = self.session_manager._filter_unsent_recipients(self.session_manager.get_current_session_id(), recipients)
 

@@ -1,10 +1,10 @@
 from tabulate import tabulate
 from typing import List, Dict, Any
-from AutoMailer.session_management.db import Database
-from AutoMailer.utils.strings import get_os_safe_name
+from automailer.session_management.db import Database
+from automailer.utils.strings import get_os_safe_name
 import os
-from AutoMailer.config import DB_FOLDER
-from AutoMailer.utils.logger import logger
+from automailer.config import DB_FOLDER
+from automailer.utils.logger import logger
 
 class SessionManager:
     def __init__(self, session_name: str) -> None:

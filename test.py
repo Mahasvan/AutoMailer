@@ -1,4 +1,4 @@
-from AutoMailer import AutoMailer, MailSender, Template
+from automailer import AutoMailer, MailSender, Template
 import json
 from pprint import pprint
 
