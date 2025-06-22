@@ -6,9 +6,9 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import json
 from typing import Optional, Any
-from AutoMailer.core.template import Template
-from AutoMailer.session_management.session_manager import SessionManager
-from AutoMailer.utils.logger import logger
+from automailer.core.template import Template
+from automailer.session_management.session_manager import SessionManager
+from automailer.utils.logger import logger
 
 class MailSender:
     def __init__(self, sender_email: str, password: str, provider: str = "gmail") -> None:
