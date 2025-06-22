@@ -3,7 +3,6 @@ from sqlalchemy import Table, create_engine, Column
 from sqlalchemy.orm import Session
 import datetime
 from typing import List, Dict, Any
-from automailer.config import DB_FOLDER
 from automailer.utils.logger import logger
 
 class Database:
