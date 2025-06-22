@@ -1,32 +1,4 @@
-from automailer import AutoMailer, MailSender, Template
-import json
-from pprint import pprint
-
-# db = Database("test.db")
-
-# try:
-#     db.insert_recipient("First Recipient Hash")
-#     db.insert_recipient("Second Recipient Hash")
-# except:
-#     print("Error inserting test recipients. They may already exist.")
-# else:
-#     print("Inserted test recipients.")
-
-# print("Retrieving recipients:\n")
-# pprint(db.get_sent_recipients())
-
-
-# sm = SessionManager("TestSession")
-
-# sm.add_recipient({"name": "John Doe"})
-# sm.add_recipient({"name": "Jane Doe"})
-
-# recipients = sm.get_sent_recipients()
-
-# print("Sent recipients:")
-# for recipient in recipients:
-#     pprint(recipient)
-
+from automailer import AutoMailer
 
 recipients1 = [
     {"email": "alice@example.com", "name": "Alice"},

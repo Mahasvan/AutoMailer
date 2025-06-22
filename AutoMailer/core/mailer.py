@@ -12,6 +12,9 @@ from automailer.utils.logger import logger
 
 class MailSender:
     def __init__(self, sender_email: str, password: str, provider: str = "gmail") -> None:
+        if not self._validate_email(sender_email):
+            logger.error(f"Invalid email address: {sender_email}")
+            raise ValueError("Invalid email address format.")
         self.sender_email = sender_email
         self.password = password
         self.smtp_server, self.smtp_port = self._get_settings(provider)
@@ -41,6 +44,10 @@ class MailSender:
         cc: Optional[list[str]] = None,
         bcc: Optional[list[str]] = None,
     ) -> bool:
+        
+        if not self._validate_email(to_email):
+            logger.error(f"Invalid recipient email address: {to_email}")
+            raise ValueError("Invalid recipient email address format.")
 
         if not text_content and not html_content:
             logger.warning("Attempted to send an email with no content.")
@@ -104,15 +111,19 @@ class MailSender:
             text = template.render_text(row)
             html = template.render_html(row)
 
-            sent = self.send_individual_mail(
-                to_email=to_email,
-                subject=subject,
-                text_content=text,
-                html_content=html,
-                attachment_paths=attachment_paths,
-                cc=cc,
-                bcc=bcc
-            )
+            try:
+                sent = self.send_individual_mail(
+                    to_email=to_email,
+                    subject=subject,
+                    text_content=text,
+                    html_content=html,
+                    attachment_paths=attachment_paths,
+                    cc=cc,
+                    bcc=bcc
+                )
+            except ValueError as e:
+                logger.error(f"Error sending email to {to_email}: {e}")
+                continue
 
             if sent and session_manager:
                 session_manager.add_recipient(row)
