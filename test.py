@@ -2,40 +2,35 @@ from automailer import AutoMailer
 from automailer import TemplateModel, TemplateEngine
 
 
-
-with open("body.txt", "r") as f:
-    body = f.read()
-
-print("Body text loaded successfully.")
-# print(body)
-
-t = TemplateEngine(body_text=body)
-
-
-recipients1 = [
-    # fields = MyFields(name="John Doe", committee="ECOSOC", allotment="Algeria")
-    {"name": "John", "committee": "ECOSOC", "allotment": "Algeria"},
-    {"name": "Alice", "committee": "UNICEF", "allotment": "USA"},
-    {"name": "Bob", "committee": "WHO", "allotment": "Canada"}
-    ]
-
-
-automailer1 = AutoMailer(
-     sender_email="sender@gmail.com",
-     password="password",
-     provider="gmail",
-     session_name="test1"
- )
-
 class MySchema(TemplateModel):
     name: str
     committee: str
     allotment: str
+    email: str
 
-input = []
-for row in recipients1:
-    input.append(MySchema(name=row["name"], committee=row["committee"], allotment=row["allotment"]))
+with open("body.txt", "r") as f:
+    body = f.read()
 
-automailer1.send_emails(
-    recipients=input, #or recipients
-    
+with open("subject.txt", "r") as f:
+    subject = f.read()
+
+template = TemplateEngine(subject=subject, body_text=body)
+
+recipients = [
+    {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "john@example.com"},
+    {"name": "Alice", "committee": "UNICEF", "allotment": "USA", "email": "alice@example.com"},
+    {"name": "Bob", "committee": "WHO", "allotment": "Canada", "email": "bob@example.com"},
+]
+
+automailer = AutoMailer(
+    sender_email="sender@gmail.com",
+    password="app password",
+    provider="gmail",
+    session_name="test"
+)
+
+automailer.send_emails(
+    recipients=recipients,
+    schema=MySchema,
+    template=template
+)

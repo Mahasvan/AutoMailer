@@ -38,7 +38,7 @@ class MailSender:
     def send_individual_mail(
         self,
         to_email: str,
-        subject: str,
+        subject: Optional[str] = None,
         text_content: Optional[str] = None,
         html_content: Optional[str] = None,
         attachment_paths: Optional[list[str]] = None,
@@ -57,7 +57,8 @@ class MailSender:
         msg = MIMEMultipart("alternative")
         msg["From"] = self.sender_email
         msg["To"] = to_email
-        msg["Subject"] = subject
+        if subject:
+            msg["Subject"] = subject
         if cc:
             msg["Cc"] = ", ".join(cc)
 
@@ -96,21 +97,21 @@ class MailSender:
     def send_bulk_mail(
         self,
         recipients: list[dict[str, str]],
-        template: TemplateEngine,
         attachment_paths: Optional[list[str]] = None,
         cc: Optional[list[str]] = None,
         bcc: Optional[list[str]] = None,
         session_manager: Optional[SessionManager] = None
     ) -> None:
-        if not template.text and not template.html:
-            logger.error("Both text and HTML templates are missing.")
-            raise ValueError("At least one template must be provided.")
-
+        
         for row in recipients:
-            to_email = row["email"]
-            subject = template.render_subject(row)
-            text = template.render_text(row)
-            html = template.render_html(row)
+            to_email = row.get("to_email")
+            subject = row.get("subject")
+            text = row.get("text_content")
+            html = row.get("html_content")
+
+            if not to_email:
+                logger.error("Recipient email address is missing.")
+                continue
 
             try:
                 sent = self.send_individual_mail(

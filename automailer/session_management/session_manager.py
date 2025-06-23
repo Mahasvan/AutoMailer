@@ -27,12 +27,12 @@ class SessionManager:
         #Initialize database
         self.db = Database(self.dbfile_path)
 
-    def _hash_recipient(self, recipient:List[str]) -> str:
-        recipient.append(self.session_name_os_safe)
+    def _hash_recipient(self, recipient:Dict[str,str]) -> str:
+        recipient['session_name'] = self.session_name_os_safe
         return str(recipient)
     
     #Filter the recipients whose email wasn't sent in the previous run
-    def _filter_unsent_recipients(self, session_id: str, recipients: List[List[str]]) -> List[Dict[str, Any]]:
+    def _filter_unsent_recipients(self, session_id: str, recipients: List[Dict[str,str]]) -> List[Dict[str, Any]]:
         unsent_recipients = []
         for recipient in recipients:
             recipient_hash = self._hash_recipient(recipient)
@@ -43,7 +43,7 @@ class SessionManager:
     def get_sent_recipients(self) -> List[Dict[str, Any]]:
         return self.db.get_sent_recipients()
     
-    def add_recipient(self, recipient: List[str]) -> None:
+    def add_recipient(self, recipient: Dict[str,str]) -> None:
         recipient_hash = self._hash_recipient(recipient)
         if not self.db.check_recipient_sent(recipient_hash):
             self.db.insert_recipient(recipient_hash)
