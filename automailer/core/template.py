@@ -21,8 +21,7 @@ class TemplateEngine:
     text: Optional[str] = None
     html: Optional[str] = None
 
-    def __init__(self, data_model: TemplateModel, subject: Optional[str] = None, body_text: Optional[str] = None, body_html: Optional[str] = None):
-        self.data_model = data_model
+    def __init__(self, subject: Optional[str] = None, body_text: Optional[str] = None, body_html: Optional[str] = None):
         self.subject = subject
         self.text = body_text
         self.html = body_html

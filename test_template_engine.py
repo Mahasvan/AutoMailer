@@ -14,7 +14,7 @@ with open("subject.txt", "r") as f:
 fields = MyFields(name="John Doe", committee="ECOSOC", allotment="Algeria")
 
 
-t = TemplateEngine(fields, body_text=body, subject=subject)
+t = TemplateEngine(body_text=body, subject=subject)
 
 res = t.render(fields)
 
