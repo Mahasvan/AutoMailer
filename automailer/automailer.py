@@ -1,5 +1,5 @@
 from automailer.core.mailer import MailSender
-from automailer.core.template import TemplateEngine
+from automailer.core.template import TemplateEngine, TemplateModel
 from automailer.session_management.session_manager import SessionManager
 from typing import List, Dict, Optional
 from automailer.utils.logger import logger
@@ -12,16 +12,15 @@ class AutoMailer:
 
     def send_emails(
         self,
-        recipients: List[Dict[str, str]],
-        subject_template: str,
-        text_template: Optional[str] = None,
-        html_template: Optional[str] = None,
-        attachment_paths: Optional[List[str]] = None,
-        cc: Optional[List[str]] = None,
-        bcc: Optional[List[str]] = None
-    ):
+        recipients: List[List[str]], # List[email addresses of each email]
+        data: List[TemplateModel], # Variable replacements - same length as recipients
+        template: TemplateEngine,
+        attachment_paths,
+        cc,
+        bcc):
+    
         logger.info(f"Preparing to send emails to {len(recipients)} recipients.")
-        template = TemplateEngine(subject=subject_template, text=text_template, html=html_template)
+        
         # todo: fix this stuff
         
         unsent = self.session_manager._filter_unsent_recipients(self.session_manager.get_current_session_id(), recipients)
@@ -29,6 +28,9 @@ class AutoMailer:
         if not unsent:
             logger.info("All recipients already emailed.")
             return
+    
+        for rec_data in data:
+            template.render(rec_data)
 
         self.mailer.send_bulk_mail(
             recipients=unsent,
