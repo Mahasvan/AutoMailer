@@ -1,23 +1,47 @@
 from typing import Optional, Dict
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
+import re
 
-class Template(BaseModel):
-    subject: str
+def get_placeholder_regex(key) -> re.Pattern:
+    pattern = r"\{\{ *KEY *\}\}".replace("KEY", key)
+    return re.compile(pattern)
+
+class TemplateModel(BaseModel):
+    @model_validator(mode='after')
+    def check_lowercase_alphanumeric(self):
+        # we are validating the field names themselves, not the value.
+        # this is because we are replacing them in the template string.
+        for name, _ in self.__dict__.items():
+            if not re.fullmatch(r'[a-z0-9]+', name):
+                raise ValueError(f"Field '{name}' must be lowercase alphanumeric with no special characters.")
+        return self
+
+class TemplateEngine:
+    subject: Optional[str] = None
     text: Optional[str] = None
     html: Optional[str] = None
 
-    def _fill(self, template: Optional[str], row: Dict[str, str]) -> Optional[str]:
-        if not template:
-            return None
-        for key, value in row.items():
-            template = template.replace(f"{{{{{key}}}}}", value)
-        return template
+    def __init__(self, data_model: TemplateModel, subject: Optional[str] = None, body_text: Optional[str] = None, body_html: Optional[str] = None):
+        self.data_model = data_model
+        self.subject = subject
+        self.text = body_text
+        self.html = body_html
 
-    def render_subject(self, row: Dict[str, str]) -> str:
-        return self._fill(self.subject, row) or ""
+    def render(self, fields: TemplateModel) -> Dict[str, str]:
+        res: dict = {
+            "subject": self.subject,
+            "text": self.text,
+            "html": self.html
+        }
 
-    def render_text(self, row: Dict[str, str]) -> str:
-        return self._fill(self.text, row) or ""
+        for key, value in fields.model_dump().items():
+            regex = get_placeholder_regex(key)
 
-    def render_html(self, row: Dict[str, str]) -> str:
-        return self._fill(self.html, row) or ""
+            if self.subject:
+                res["subject"] = regex.sub(str(value), res["subject"])
+            if self.text:
+                res["text"] = regex.sub(str(value), res["text"])
+            if self.html:
+                res["html"] = regex.sub(str(value), res["html"])
+
+        return res

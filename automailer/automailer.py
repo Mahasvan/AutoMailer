@@ -1,5 +1,5 @@
 from automailer.core.mailer import MailSender
-from automailer.core.template import Template
+from automailer.core.template import TemplateEngine
 from automailer.session_management.session_manager import SessionManager
 from typing import List, Dict, Optional
 from automailer.utils.logger import logger
@@ -21,14 +21,15 @@ class AutoMailer:
         bcc: Optional[List[str]] = None
     ):
         logger.info(f"Preparing to send emails to {len(recipients)} recipients.")
-        template = Template(subject=subject_template, text=text_template, html=html_template)
-
+        template = TemplateEngine(subject=subject_template, text=text_template, html=html_template)
+        # todo: fix this stuff
+        
         unsent = self.session_manager._filter_unsent_recipients(self.session_manager.get_current_session_id(), recipients)
 
         if not unsent:
             logger.info("All recipients already emailed.")
             return
-        
+
         self.mailer.send_bulk_mail(
             recipients=unsent,
             template=template,

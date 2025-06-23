@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import json
 from typing import Optional, Any
-from automailer.core.template import Template
+from automailer.core.template import TemplateEngine
 from automailer.session_management.session_manager import SessionManager
 from automailer.utils.logger import logger
 
@@ -29,7 +29,7 @@ class MailSender:
             logger.error(f"Provider '{provider}' not found in settings.")
             raise ValueError("Invalid provider.")
         return tuple(settings[provider])  # type: ignore
-    
+
     #check email format using regex
     def _validate_email(self, email: str) -> bool:
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
@@ -45,7 +45,7 @@ class MailSender:
         cc: Optional[list[str]] = None,
         bcc: Optional[list[str]] = None,
     ) -> bool:
-        
+
         if not self._validate_email(to_email):
             logger.error(f"Invalid recipient email address: {to_email}")
             raise ValueError("Invalid recipient email address format.")
@@ -96,7 +96,7 @@ class MailSender:
     def send_bulk_mail(
         self,
         recipients: list[dict[str, str]],
-        template: Template,
+        template: TemplateEngine,
         attachment_paths: Optional[list[str]] = None,
         cc: Optional[list[str]] = None,
         bcc: Optional[list[str]] = None,
