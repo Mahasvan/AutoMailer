@@ -12,8 +12,8 @@ class TemplateModel(BaseModel):
         # we are validating the field names themselves, not the value.
         # this is because we are replacing them in the template string.
         for name, _ in self.__dict__.items():
-            if not re.fullmatch(r'[a-z0-9]+', name):
-                raise ValueError(f"Field '{name}' must be lowercase alphanumeric with no special characters.")
+            if not re.fullmatch(r'[a-z0-9_]+', name):
+                raise ValueError(f"Field '{name}' must be lowercase alphanumeric characters or underscore.")
         return self
 
 class TemplateEngine:
