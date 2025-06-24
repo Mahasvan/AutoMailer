@@ -1,12 +1,14 @@
 from typing import Optional, Dict
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, computed_field
 import re
+import json
 
 def get_placeholder_regex(key) -> re.Pattern:
     pattern = r"\{\{ *KEY *\}\}".replace("KEY", key)
     return re.compile(pattern)
 
 class TemplateModel(BaseModel):
+    
     @model_validator(mode='after')
     def check_lowercase_alphanumeric(self):
         # we are validating the field names themselves, not the value.
@@ -15,6 +17,20 @@ class TemplateModel(BaseModel):
             if not re.fullmatch(r'[a-z0-9_]+', name):
                 raise ValueError(f"Field '{name}' must be lowercase alphanumeric characters or underscore.")
         return self
+
+    @computed_field
+    @property
+    def hash_string(self) -> str:
+        """
+        Returns a hash of the model's fields.
+        This is used to uniquely identify the template model.
+        """
+        # we cant do model_dump because it keeps recursively calling this computed field
+        dump = self.model_json_schema()
+        res = {}
+        for key in dump["properties"].keys():
+            res[key] = self.__dict__.get(key, None)
+        return json.dumps(res)
 
 class TemplateEngine:
     subject: Optional[str] = None
