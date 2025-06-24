@@ -22,6 +22,11 @@ recipients = [
     {"name": "Bob", "committee": "WHO", "allotment": "Canada", "email": "bob@example.com"},
 ]
 
+obj_recipients = [MySchema(**recipient) for recipient in recipients]
+for recipient in obj_recipients:
+    print("Hash:", recipient.hash_string)
+
+
 automailer = AutoMailer(
     sender_email="sender@gmail.com",
     password="app password",
