@@ -5,6 +5,8 @@ from automailer.utils.strings import get_os_safe_name
 import os
 from automailer.config import DB_FOLDER
 from automailer.utils.logger import logger
+from automailer.utils.types import TemplateModelType
+from automailer.core.template import TemplateModel
 
 class SessionManager:
     def __init__(self, session_name: str) -> None:
@@ -26,26 +28,27 @@ class SessionManager:
         
         #Initialize database
         self.db = Database(self.dbfile_path)
-
-    def _hash_recipient(self, recipient:Dict[str,str]) -> str:
-        recipient['session_name'] = self.session_name_os_safe
-        return str(recipient)
     
     #Filter the recipients whose email wasn't sent in the previous run
-    def _filter_unsent_recipients(self, session_id: str, recipients: List[Dict[str,str]]) -> List[Dict[str, Any]]:
+    def _filter_unsent_recipients(self, recipients: List[TemplateModelType]) -> List[TemplateModelType]:
         unsent_recipients = []
         for recipient in recipients:
-            recipient_hash = self._hash_recipient(recipient)
+            recipient_hash = recipient.hash_string
             if not self.db.check_recipient_sent(recipient_hash):
                 unsent_recipients.append(recipient)
         return unsent_recipients
     
+    def filter_sent_recipients(self, recipients: List[TemplateModelType]) -> List[TemplateModelType]:
+        sent =  [r['recipient_hash'] for r in self.db.get_sent_recipients()]
+        return [recipient for recipient in recipients if recipient.hash_string not in sent]
+    
     def get_sent_recipients(self) -> List[Dict[str, Any]]:
         return self.db.get_sent_recipients()
     
-    def add_recipient(self, recipient: Dict[str,str]) -> None:
-        recipient_hash = self._hash_recipient(recipient)
+    def add_recipient(self, recipient: TemplateModel) -> None:
+        recipient_hash = recipient.hash_string
         if not self.db.check_recipient_sent(recipient_hash):
             self.db.insert_recipient(recipient_hash)
+
     def get_current_session_id(self) -> str:
         return self.session_name_os_safe

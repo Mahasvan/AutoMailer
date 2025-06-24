@@ -35,7 +35,7 @@ automailer = AutoMailer(
 )
 
 automailer.send_emails(
-    recipients=recipients,
-    schema=MySchema,
+    recipients=obj_recipients,
+    email_field="email",
     template=template
 )

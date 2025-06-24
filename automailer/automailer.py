@@ -1,8 +1,10 @@
 from automailer.core.mailer import MailSender
-from automailer.core.template import TemplateEngine, TemplateModel
+from automailer.core.template import TemplateEngine
 from automailer.session_management.session_manager import SessionManager
-from typing import List, Dict, Optional, Type
+from typing import List
 from automailer.utils.logger import logger
+from automailer.utils.types import TemplateModelType
+
 
 class AutoMailer:
     def __init__(self, sender_email: str, password: str, provider: str, session_name: str):
@@ -12,30 +14,30 @@ class AutoMailer:
 
     def send_emails(
         self,
-        recipients: List[Dict[str,str]],
-        schema: Type[TemplateModel], 
+        recipients: List[TemplateModelType],
+        email_field: str,
         template: TemplateEngine,
         attachment_paths = None,
         cc = None,
-        bcc= None):
+        bcc= None
+        ):
     
         logger.info(f"Preparing to send emails to {len(recipients)} recipients.")
 
-        unsent = self.session_manager._filter_unsent_recipients(self.session_manager.get_current_session_id(), recipients)
-
-        if not unsent:
-            logger.info("All recipients already emailed.")
-            return
-    
+        
+        sent = self.session_manager.filter_sent_recipients(recipients)
+        
         rendered_emails = []
-        for recipient in unsent:
+        
+        for recipient in recipients:
+            if recipient in sent: continue # if recipient is already sent, skip it
+
             try:
-                fields = schema(**recipient)
-                rendered = template.render(fields)
+                rendered = template.render(recipient)
                 print("Rendered email:", rendered)
 
                 rendered_email = {
-                    "to_email": recipient["email"],
+                    "to_email": recipient.__dict__[email_field],
                     "subject": rendered.get("subject", ""),
                     "text_content": rendered.get("text", ""),
                     "html_content": rendered.get("html", None)
@@ -44,8 +46,8 @@ class AutoMailer:
                 rendered_emails.append(rendered_email)
                 self.session_manager.add_recipient(recipient)
             except Exception as e:
-                logger.error(f"Error rendering email for {recipient['email']}: {e}")
-                print(f"Error rendering email for {recipient['email']}: {e}")
+                logger.error(f"Error rendering email for {recipient.__dict__[email_field]}: {e}")
+                print(f"Error rendering email for {recipient.__dict__[email_field]}: {e}")
 
         self.mailer.send_bulk_mail(
             recipients=rendered_emails,
