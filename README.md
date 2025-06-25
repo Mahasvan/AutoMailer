@@ -11,10 +11,11 @@ AutoMailer is a Python library for sending bulk emails with support for template
 - Session management to avoid duplicate sends
 - Logging for all actions
 
-## Documentation
+## Quickstart
 
-For docs, visit [The Documentation Page](DOCS.md)
+Visit [The Documentation Page](DOCS.md)
 
+<!-- 
 ## Installation
 
 Install via pip (after building your package):
@@ -34,9 +35,10 @@ AutoMailer
 - Python 3.10+
 - `sqlalchemy`
 - `tabulate`
-- `pydantic`
-
+- `pydantic` -->
+<!-- 
 ## Quick Start
+
 
 ### 1. Prepare your settings
 
@@ -104,12 +106,28 @@ AutoMailer tracks which recipients have already been emailed in a session. If yo
 
 ## Logging
 
-Logs are handled via the built-in logger and will output to the console.
+Logs are handled via the built-in logger and will output to the console. -->
+
+
+## So why should I use this library?
+
+The beauty of AutoMailer is that if your machine has an outage halfway through sending, there is no need to change the script in any way.
+You need **no extra configuration** to prevent an email from sending to the same recipient twice.
+
+Just run the script again, with no changes, and our inbuilt progress management system will take are of the rest.
 
 ## License
 
-MIT License
+[MIT License](LICENSE)
 
----
+
+## Credits
+
+This project was brought to life by a squad in the Tech Team of [SSN-SNUC MUN 2025](https://ssnsnucmun.in)'s Organizing Committee.
+
+- [Nilaa](http://github.com/nil-aa)
+- [Kamlesh](http://github.com/Kamlesh-DevOP)
+- [Sharon](http://github.com/sharonprabhu11)
+- [Mahasvan](http://github.com/Mahasvan)
 
 **Note:** Never hardcode your email password in production code. Use environment variables or secure vaults.
