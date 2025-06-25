@@ -11,6 +11,10 @@ AutoMailer is a Python library for sending bulk emails with support for template
 - Session management to avoid duplicate sends
 - Logging for all actions
 
+## Documentation
+
+For docs, visit [The Documentation Page](DOCS.md)
+
 ## Installation
 
 Install via pip (after building your package):

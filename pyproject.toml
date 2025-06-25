@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling >= 1.26", "sqlalchemy", "tabulate", "pydantic>=2.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "automailer"
+version = "0.0.3"
+dependencies = [
+    "sqlalchemy",
+    "tabulate",
+    "pydantic>=2.0",
+]
+authors = [{ name = "Mahasvan", email = "mahasvan@gmail.com" }]
+description = "An email automation service that incorporates templates and state tracking for sending emails en masse."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/Mahasvan/AutoMailer/"
+Issues = "https://github.com/Mahasvan/AutoMailer/issues"
