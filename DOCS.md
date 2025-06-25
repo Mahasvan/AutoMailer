@@ -10,7 +10,7 @@ The main purpose of this library is to streamline and standardize template usage
 ### Install the Library
 
 ```shell
-pip install -r https://raw.githubusercontent.com/Mahasvan/AutoMailer/refs/heads/main/requirements.txt?token=GHSAT0AAAAAADFR554MKXQ3ZUWBYY7QYLGU2C4C5XQ
+pip install sqlalchemy tabulate pydantic
 
 pip install -i https://test.pypi.org/simple/ automailer==0.0.3
 ```
