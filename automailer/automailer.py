@@ -11,6 +11,8 @@ class AutoMailer:
         logger.info(f"Initializing AutoMailer for {sender_email} with provider {provider} and session '{session_name}'")
         self.mailer = MailSender(sender_email, password, provider)
         self.session_manager = SessionManager(session_name)
+        # print(f"AutoMailer initialized for {sender_email} with provider {provider} and session '{session_name}'")
+        # print(f"{len(self.session_manager.get_sent_recipients())} recipients already sent in this session.")
 
     def send_emails(
         self,
@@ -26,17 +28,20 @@ class AutoMailer:
 
         
         sent = self.session_manager.filter_sent_recipients(recipients)
-        
+        print(f"{len(sent)} recipients already sent.")
         rendered_emails = []
         
         for recipient in recipients:
-            if recipient in sent: continue # if recipient is already sent, skip it
+            if recipient in sent: 
+                print(f"{recipient.__dict__[email_field]} already sent, skipping.")
+                continue # if recipient is already sent, skip it
 
             try:
                 rendered = template.render(recipient)
                 print("Rendered email:", rendered)
 
                 rendered_email = {
+                    "object": recipient,
                     "to_email": recipient.__dict__[email_field],
                     "subject": rendered.get("subject", ""),
                     "text_content": rendered.get("text", ""),
@@ -44,7 +49,6 @@ class AutoMailer:
                 }
 
                 rendered_emails.append(rendered_email)
-                self.session_manager.add_recipient(recipient)
             except Exception as e:
                 logger.error(f"Error rendering email for {recipient.__dict__[email_field]}: {e}")
                 print(f"Error rendering email for {recipient.__dict__[email_field]}: {e}")

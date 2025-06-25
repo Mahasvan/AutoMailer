@@ -3,12 +3,12 @@ from pydantic import BaseModel, model_validator, computed_field
 import re
 import json
 
+
 def get_placeholder_regex(key) -> re.Pattern:
     pattern = r"\{\{ *KEY *\}\}".replace("KEY", key)
     return re.compile(pattern)
 
 class TemplateModel(BaseModel):
-    
     @model_validator(mode='after')
     def check_lowercase_alphanumeric(self):
         # we are validating the field names themselves, not the value.

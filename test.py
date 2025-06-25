@@ -17,9 +17,9 @@ with open("subject.txt", "r") as f:
 template = TemplateEngine(subject=subject, body_text=body)
 
 recipients = [
-    {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "john@example.com"},
-    {"name": "Alice", "committee": "UNICEF", "allotment": "USA", "email": "alice@example.com"},
-    {"name": "Bob", "committee": "WHO", "allotment": "Canada", "email": "bob@example.com"},
+    {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "myEmail@gmail.com"},
+    {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "myEmail@outlook.com"},
+    {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "myEmail@snuchennai.edu.in"},
 ]
 
 obj_recipients = [MySchema(**recipient) for recipient in recipients]
@@ -28,11 +28,13 @@ for recipient in obj_recipients:
 
 
 automailer = AutoMailer(
-    sender_email="sender@gmail.com",
-    password="app password",
+    sender_email="myEmail@gmail.com",
+    password="myPass",
     provider="gmail",
     session_name="test"
 )
+
+print("Mailer object created")
 
 automailer.send_emails(
     recipients=obj_recipients,

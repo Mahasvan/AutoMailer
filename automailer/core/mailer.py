@@ -9,6 +9,7 @@ from typing import Optional, Any
 from automailer.core.template import TemplateEngine
 from automailer.session_management.session_manager import SessionManager
 from automailer.utils.logger import logger
+from automailer.utils.types import TemplateModelType,  TemplateModel
 
 class MailSender:
     def __init__(self, sender_email: str, password: str, provider: str = "gmail") -> None:
@@ -96,14 +97,15 @@ class MailSender:
 
     def send_bulk_mail(
         self,
-        recipients: list[dict[str, str]],
+        recipients: list[dict[str, Any]],
+        session_manager: SessionManager,
         attachment_paths: Optional[list[str]] = None,
         cc: Optional[list[str]] = None,
         bcc: Optional[list[str]] = None,
-        session_manager: Optional[SessionManager] = None
     ) -> None:
         
         for row in recipients:
+            object: TemplateModelType = row['object'] # type: ignore
             to_email = row.get("to_email")
             subject = row.get("subject")
             text = row.get("text_content")
@@ -128,7 +130,7 @@ class MailSender:
                 continue
 
             if sent and session_manager:
-                session_manager.add_recipient(row)
+                session_manager.add_recipient(object)
 
             if not sent:
                 logger.warning(f"Couldn't send email to {to_email}.")

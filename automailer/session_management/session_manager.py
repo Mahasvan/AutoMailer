@@ -40,7 +40,7 @@ class SessionManager:
     
     def filter_sent_recipients(self, recipients: List[TemplateModelType]) -> List[TemplateModelType]:
         sent =  [r['recipient_hash'] for r in self.db.get_sent_recipients()]
-        return [recipient for recipient in recipients if recipient.hash_string not in sent]
+        return [recipient for recipient in recipients if recipient.hash_string in sent]
     
     def get_sent_recipients(self) -> List[Dict[str, Any]]:
         return self.db.get_sent_recipients()
