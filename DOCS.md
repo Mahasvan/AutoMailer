@@ -9,6 +9,10 @@ The main purpose of this library is to streamline and standardize template usage
 
 ### Install the Library
 
+The process is not as straightforward as "pip install automailer", and we're working on it!
+
+Until then,
+
 ```shell
 pip install sqlalchemy tabulate pydantic
 
@@ -23,9 +27,14 @@ from automailer import AutoMailer, TemplateModel, TemplateEngine
 ```
 
 After importing, we need to define a schema for our data model.
-This MySchema class inherits from TemplateModel, which is the same as defining a `Pydantic` model from its `BaseModel` class. 
+This MySchema class inherits from TemplateModel.
+
+(It's like defining a `Pydantic` model from its `BaseModel` class!)
 
 We have four fields for this example. these four fields will be all we need to build the metadata for our email.
+
+**NOTE**: Make sure to have a field for the **destination email address** (`email` here), as that will be used for the internal email logic. 
+You will use this as the `sender_email` argument when calling `send_emails`.
 
 ```python
 class MySchema(TemplateModel):
@@ -44,8 +53,7 @@ Next up, we define the templates for our subject and body.
 - This variable name corresponds to the `MySchema` field you defined previously.
 - Whitespaces between the variable name and the curly braces are optional, but we recommend them for better readability.
 
-**NOTE**: Variable names must be **lowercase alphanumeric characters, or underscore**. No other character is allowed.
-
+**NOTE**: Variable names must consist of either **lowercase alphanumeric characters, or underscore**. No other character is allowed.
 
 Now, let's define the templates for the subject and body in these two files:
 
@@ -119,5 +127,3 @@ automailer.send_emails(
 ```
 
 And we're done!
-
-<hr>
