@@ -97,7 +97,7 @@ recipients = [
     {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "myEmail@snuchennai.edu.in"},
 ]
 
-obj_recipients = [MySchema(name=recipient['name'], committee=recipient['country'], ... )) for recipient in recipients]
+obj_recipients = [MySchema(name=recipient['name'], committee=recipient['country'], ... ) for recipient in recipients]
 ```
 
 ### Sending the Emails
