@@ -114,7 +114,7 @@ Logs are handled via the built-in logger and will output to the console. -->
 The beauty of AutoMailer is that if your machine has an outage halfway through sending, there is no need to change the script in any way.
 You need **no extra configuration** to prevent an email from sending to the same recipient twice.
 
-Just run the script again, with no changes, and our inbuilt progress management system will take are of the rest.
+Just run the script again, with no changes, and our inbuilt progress management system will take care of the rest.
 
 ## License
 
