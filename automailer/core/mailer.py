@@ -2,6 +2,7 @@ import smtplib
 import re
 import os
 import time
+import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -102,63 +103,87 @@ class MailSender:
         cc: Optional[list[str]] = None,
         bcc: Optional[list[str]] = None,
     ) -> None:
+        server = None
+        server_closed = False
         try:
             server = smtplib.SMTP(self.smtp_server, self.smtp_port)
             server.starttls()
             server.login(self.sender_email, self.password)
             logger.info(f"Connected to SMTP server {self.smtp_server} as {self.sender_email}")
-        except Exception as e:
-            logger.error(f"Couldn't connect to SMTP server: {e}")
-            raise ValueError("Couldn't connect to SMTP server. Check credentials and provider settings.")
         
-        first = recipients[0]
-        print("\nPREVIEW:")
-        print(f"To          : {first.get('to_email')}")
-        print(f"Subject     : {first.get('subject')}")
-        print("\nBODY (TEXT):")
-        print(first.get('text_content') or "(no text content)")
-        print("\nBODY (HTML):")
-        print(first.get('html_content') or "(no HTML content)")
-        print("\n\n")
-        print("Sending will start in 5 seconds...Press Ctrl+C to cancel.")
-
-        time.sleep(5)
-
-        
-        for row in recipients:
-            object: TemplateModelType = row['object'] # type: ignore
-            to_email = row.get("to_email")
-            subject = row.get("subject")
-            text = row.get("text_content")
-            html = row.get("html_content")
-
-            if not to_email:
-                logger.error("Recipient email address is missing.")
-                continue
+            first = recipients[0]
+            print("\nPREVIEW:")
+            print(f"To          : {first.get('to_email')}")
+            print(f"Subject     : {first.get('subject')}")
+            print("\nBODY (TEXT):")
+            print(first.get('text_content') or "(no text content)")
+            print("\nBODY (HTML):")
+            print(first.get('html_content') or "(no HTML content)")
+            print("\n\n")
+            print("Sending will start in 5 seconds...Press Ctrl+C to cancel.")
 
             try:
-                sent = self.send_individual_mail(
-                    server=server,
-                    to_email=to_email,
-                    subject=subject,
-                    text_content=text,
-                    html_content=html,
-                    attachment_paths=attachment_paths,
-                    cc=cc,
-                    bcc=bcc
-                )
-            except ValueError as e:
-                logger.error(f"Error sending email to {to_email}: {e}")
-                continue
+                time.sleep(5)
+            except KeyboardInterrupt:
+                logger.info("Email sending canceled by user.")
+                if server and not server_closed:
+                    server.quit()
+                    logger.info("SMTP server connection closed.")
+                    server_closed = True
+                sys.exit(0)
 
-            if sent and session_manager:
-                session_manager.add_recipient(object)
+            for row in recipients:
+                    try:
+                        object: TemplateModelType = row['object'] # type: ignore
+                        to_email = row.get("to_email")
+                        subject = row.get("subject")
+                        text = row.get("text_content")
+                        html = row.get("html_content")
 
-            if not sent:
-                logger.warning(f"Couldn't send email to {to_email}.")
+                        if not to_email:
+                            logger.error("Recipient email address is missing.")
+                            continue
 
-        try:
-            server.quit()
-            logger.info("SMTP server connection closed.")
+                    
+                        sent = self.send_individual_mail(
+                                server=server,
+                                to_email=to_email,
+                                subject=subject,
+                                text_content=text,
+                                html_content=html,
+                                attachment_paths=attachment_paths,
+                                cc=cc,
+                                bcc=bcc
+                        )
+
+                        if sent and session_manager:
+                            session_manager.add_recipient(object)
+
+                        if not sent:
+                            logger.warning(f"Couldn't send email to {to_email}.")
+
+                    except KeyboardInterrupt:
+                        logger.info("Email sending canceled by user.")
+                        if server and not server_closed:
+                            server.quit()
+                            logger.info("SMTP server connection closed.")
+                            server_closed = True
+                        sys.exit(0)
+
+                    except Exception as e:
+                        logger.error(f"Error during email sending: {e}")
+                        continue
+
+        except KeyboardInterrupt:
+            logger.info("Email sending canceled by user.")
         except Exception as e:
-            logger.error(f"Error closing SMTP server connection: {e}")
+            logger.error(f"Error connecting to server: {e}")
+        finally:
+            if server and not server_closed:
+                try:
+                    server.quit()
+                    logger.info("SMTP server connection closed.")
+                except Exception as e:
+                    logger.error(f"Error closing SMTP server connection: {e}")
+                finally:
+                    sys.exit(0)
