@@ -111,6 +111,18 @@ class MailSender:
             logger.error(f"Couldn't connect to SMTP server: {e}")
             raise ValueError("Couldn't connect to SMTP server. Check credentials and provider settings.")
         
+        first = recipients[0]
+        print("\nPREVIEW:")
+        print(f"To          : {first.get('to_email')}")
+        print(f"Subject     : {first.get('subject')}")
+        print("\nBODY (TEXT):")
+        print(first.get('text_content') or "(no text content)")
+        print("\nBODY (HTML):")
+        print(first.get('html_content') or "(no HTML content)")
+        print("\n\n")
+        print("Sending will start in 5 seconds...Press Ctrl+C to cancel.")
+
+        time.sleep(5)
 
         
         for row in recipients:
