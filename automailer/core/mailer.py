@@ -1,6 +1,7 @@
 import smtplib
 import re
 import os
+import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -38,6 +39,7 @@ class MailSender:
 
     def send_individual_mail(
         self,
+        server: smtplib.SMTP,
         to_email: str,
         subject: Optional[str] = None,
         text_content: Optional[str] = None,
@@ -80,16 +82,13 @@ class MailSender:
                     return False
 
         try:
-            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
-                server.starttls()
-                server.login(self.sender_email, self.password)
-                server.sendmail(
-                    self.sender_email,
-                    [to_email] + (cc or []) + (bcc or []),
-                    msg.as_string()
-                )
-                logger.info(f"Email sent to {to_email}")
-                return True
+            server.sendmail(
+                self.sender_email,
+                [to_email] + (cc or []) + (bcc or []),
+                msg.as_string()
+            )
+            logger.info(f"Email sent to {to_email}")
+            return True
 
         except Exception as e:
             logger.error(f"Couldn't send email to {to_email}: {e}")
@@ -103,6 +102,16 @@ class MailSender:
         cc: Optional[list[str]] = None,
         bcc: Optional[list[str]] = None,
     ) -> None:
+        try:
+            server = smtplib.SMTP(self.smtp_server, self.smtp_port)
+            server.starttls()
+            server.login(self.sender_email, self.password)
+            logger.info(f"Connected to SMTP server {self.smtp_server} as {self.sender_email}")
+        except Exception as e:
+            logger.error(f"Couldn't connect to SMTP server: {e}")
+            raise ValueError("Couldn't connect to SMTP server. Check credentials and provider settings.")
+        
+
         
         for row in recipients:
             object: TemplateModelType = row['object'] # type: ignore
@@ -117,6 +126,7 @@ class MailSender:
 
             try:
                 sent = self.send_individual_mail(
+                    server=server,
                     to_email=to_email,
                     subject=subject,
                     text_content=text,
@@ -134,3 +144,9 @@ class MailSender:
 
             if not sent:
                 logger.warning(f"Couldn't send email to {to_email}.")
+
+        try:
+            server.quit()
+            logger.info("SMTP server connection closed.")
+        except Exception as e:
+            logger.error(f"Error closing SMTP server connection: {e}")
