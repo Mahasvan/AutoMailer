@@ -33,7 +33,7 @@ This MySchema class inherits from TemplateModel.
 
 We have four fields for this example. these four fields will be all we need to build the metadata for our email.
 
-**NOTE**: Make sure to have a field for the **destination email address** (`email` here), as that will be used for the internal email logic. 
+**NOTE**: Make sure to have a field for the **destination email address** (`email` here), as that will be used for the internal email logic.
 You will use this as the `sender_email` argument when calling `send_emails`.
 
 ```python
@@ -58,12 +58,14 @@ Next up, we define the templates for our subject and body.
 Now, let's define the templates for the subject and body in these two files:
 
 `subject.txt`:
-```
+
+```text
 MUN Allotment Details
 ```
 
 `body.txt`:
-```
+
+```text
 Hi {{name}}
 
 You have been allotted {{ allotment }} in {{  committee  }}.
@@ -84,11 +86,11 @@ template = TemplateEngine(subject=subject, body_text=body)
 ```
 
 ## Loading Data
+
 The list of recipients is expected to be a list of `MySchema` objects, where we defined `MySchema` previously.
 From whatever data source you have, convert the data into the schema that you defined.
 
 In this example, my datasource is a list of dictionaries, for convenience.
-
 
 ```python
 recipients = [
@@ -103,11 +105,11 @@ obj_recipients = [MySchema(name=recipient['name'], committee=recipient['country'
 ### Sending the Emails
 
 Next, we define the AutoMailer instance which handles the email sending for these recipients.
-We need to provide the source email credentials, as well as the email provider to be used. 
+We need to provide the source email credentials, as well as the email provider to be used.
 
 Currently supported options are: `"gmail"` and `"outlook"`. (case sensitive).
 
-```
+```python
 automailer = AutoMailer(
     sender_email="myEmail@gmail.com",
     password="myPass",
