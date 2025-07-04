@@ -8,6 +8,7 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import json
 from typing import Optional, Any
+
 from automailer.core.template import TemplateEngine
 from automailer.session_management.session_manager import SessionManager
 from automailer.utils.logger import logger
@@ -15,9 +16,7 @@ from automailer.utils.types import TemplateModelType,  TemplateModel
 
 class MailSender:
     def __init__(self, sender_email: str, password: str, provider: str = "gmail") -> None:
-        if not self._validate_email(sender_email):
-            logger.error(f"Invalid email address: {sender_email}")
-            raise ValueError("Invalid email address format.")
+        self._validate_email(sender_email)
         self.sender_email = sender_email
         self.password = password
         self.smtp_server, self.smtp_port = self._get_settings(provider)
@@ -34,13 +33,18 @@ class MailSender:
         return tuple(settings[provider])  # type: ignore
 
     #check email format using regex
-    def _validate_email(self, email: str) -> bool:
+    def _is_valid_email(self, email: str) -> bool:
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return re.match(pattern, email) is not None
 
-    def send_individual_mail(
+    def _validate_email(self, email: str) -> bool:
+        if not self._is_valid_email(email):
+            logger.error(f"Invalid email address: {email}")
+            raise ValueError("Invalid email address format.")
+        return True
+    
+    def prepare_message(
         self,
-        server: smtplib.SMTP,
         to_email: str,
         subject: Optional[str] = None,
         text_content: Optional[str] = None,
@@ -48,16 +52,9 @@ class MailSender:
         attachment_paths: Optional[list[str]] = None,
         cc: Optional[list[str]] = None,
         bcc: Optional[list[str]] = None,
-    ) -> bool:
-
-        if not self._validate_email(to_email):
-            logger.error(f"Invalid recipient email address: {to_email}")
-            raise ValueError("Invalid recipient email address format.")
-
-        if not text_content and not html_content:
-            logger.warning("Attempted to send an email with no content.")
-            raise ValueError("At least one content type must be provided.")
-
+    ) -> MIMEMultipart:
+        
+        
         msg = MIMEMultipart("alternative")
         msg["From"] = self.sender_email
         msg["To"] = to_email
@@ -80,20 +77,57 @@ class MailSender:
                         msg.attach(part)
                 except Exception as e:
                     logger.warning(f"Couldn't attach file '{file_path}': {e}")
-                    return False
+        return msg
+        
+
+    def send_individual_mail(
+        self,
+        server: smtplib.SMTP,
+        to_email: str,
+        subject: Optional[str] = None,
+        text_content: Optional[str] = None,
+        html_content: Optional[str] = None,
+        attachment_paths: Optional[list[str]] = None,
+        cc: Optional[list[str]] = None,
+        bcc: Optional[list[str]] = None,
+    ) -> bool:
+        
+        self._validate_email(to_email)
+
+        if not text_content and not html_content:
+            logger.warning("Attempted to send an email with no content.")
+            raise ValueError("At least one content type must be provided.")
+
+        msg = self.prepare_message(
+            to_email=to_email,
+            subject=subject,
+            text_content=text_content,
+            html_content=html_content,
+            attachment_paths=attachment_paths,
+            cc=cc,
+            bcc=bcc)
 
         try:
-            server.sendmail(
-                self.sender_email,
-                [to_email] + (cc or []) + (bcc or []),
-                msg.as_string()
-            )
-            logger.info(f"Email sent to {to_email}")
+            server.sendmail(self.sender_email,
+                            [to_email] + (cc or []) + (bcc or []), 
+                            msg.as_string())
+            logger.info(f"Email sent to {to_email} successfully.")
             return True
-
         except Exception as e:
             logger.error(f"Couldn't send email to {to_email}: {e}")
             return False
+        
+    def preview_email(self, example: dict[str, Any]) -> None:
+        print("\nPREVIEW:")
+        print(f"To          : {example.get('to_email')}")
+        print(f"Subject     : {example.get('subject')}")
+        print("\nBODY (TEXT):")
+        print(example.get('text_content') or "(no text content)")
+        print("\nBODY (HTML):")
+        print(example.get('html_content') or "(no HTML content)")
+        print("\n\n")
+        print("Sending will start in 5 seconds...Press Ctrl+C to cancel.")
+
 
     def send_bulk_mail(
         self,
@@ -112,15 +146,7 @@ class MailSender:
             logger.info(f"Connected to SMTP server {self.smtp_server} as {self.sender_email}")
         
             first = recipients[0]
-            print("\nPREVIEW:")
-            print(f"To          : {first.get('to_email')}")
-            print(f"Subject     : {first.get('subject')}")
-            print("\nBODY (TEXT):")
-            print(first.get('text_content') or "(no text content)")
-            print("\nBODY (HTML):")
-            print(first.get('html_content') or "(no HTML content)")
-            print("\n\n")
-            print("Sending will start in 5 seconds...Press Ctrl+C to cancel.")
+            self.preview_email(first)
 
             try:
                 time.sleep(5)
