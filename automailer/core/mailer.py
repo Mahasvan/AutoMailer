@@ -139,7 +139,9 @@ class MailSender:
                         subject = row.get("subject")
                         text = row.get("text_content")
                         html = row.get("html_content")
-                        attachment_paths = row.get("attachments", attachment_paths)
+                        r_attachment_paths = row.get("attachments", attachment_paths)
+                        r_cc = row.get("cc", cc)
+                        r_bcc = row.get("bcc", bcc)
 
                         if not to_email:
                             logger.error("Recipient email address is missing.")
@@ -152,9 +154,9 @@ class MailSender:
                                 subject=subject,
                                 text_content=text,
                                 html_content=html,
-                                attachment_paths=attachment_paths,
-                                cc=cc,
-                                bcc=bcc
+                                attachment_paths=r_attachment_paths,
+                                cc=r_cc,
+                                bcc=r_bcc
                         )
 
                         if sent and session_manager:
