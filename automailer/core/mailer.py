@@ -139,6 +139,7 @@ class MailSender:
                         subject = row.get("subject")
                         text = row.get("text_content")
                         html = row.get("html_content")
+                        attachment_paths = row.get("attachments", attachment_paths)
 
                         if not to_email:
                             logger.error("Recipient email address is missing.")
