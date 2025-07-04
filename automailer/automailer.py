@@ -23,7 +23,8 @@ class AutoMailer:
         cc = None,
         bcc= None,
         cc_field: str = "cc",
-        bcc_field: str = "bcc"
+        bcc_field: str = "bcc",
+        attachment_field: str = "attachments"
         ):
     
         logger.info(f"Preparing to send emails to {len(recipients)} recipients.")
@@ -48,7 +49,7 @@ class AutoMailer:
                     "subject": rendered.get("subject", ""),
                     "text_content": rendered.get("text", ""),
                     "html_content": rendered.get("html", None),
-                    "attachments": recipient.__dict__.get("attachments", attachment_paths),
+                    "attachments": recipient.__dict__.get(attachment_field, attachment_paths),
                     "cc": recipient.__dict__.get(cc_field, cc),
                     "bcc": recipient.__dict__.get(bcc_field, bcc)
                 }

@@ -62,6 +62,8 @@ class MailSender:
             msg["Subject"] = subject
         if cc:
             msg["Cc"] = ", ".join(cc)
+        if bcc:
+            msg["Bcc"] = ", ".join(bcc)
 
         if text_content:
             msg.attach(MIMEText(text_content, "plain"))
