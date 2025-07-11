@@ -19,7 +19,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 license = "MIT"
-license-files = ["LICENCSE"]
+license-files = ["LICENSE"]
+keywords = ["email", "automation", "automailer", "bulk mail", "state tracking", "state management"]
 
 [project.urls]
 Homepage = "https://github.com/Mahasvan/AutoMailer/"
