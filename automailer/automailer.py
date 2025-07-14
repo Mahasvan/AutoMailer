@@ -27,6 +27,8 @@ class AutoMailer:
         attachment_field: str = "attachments"
         ):
         all_attachment_paths = attachment_paths or []
+        all_cc = cc or []
+        all_bcc = bcc or []
     
         logger.info(f"Preparing to send emails to {len(recipients)} recipients.")
 
@@ -45,7 +47,12 @@ class AutoMailer:
                 print("Rendered email:", rendered)
 
                 rec_attachments = recipient.__dict__.get(attachment_field) or []
+                rec_cc = recipient.__dict__.get(cc_field) or []
+                rec_bcc = recipient.__dict__.get(bcc_field) or []
+
                 combined_attachments = list(set(all_attachment_paths + rec_attachments))
+                combined_cc = list(set(all_cc + rec_cc))
+                combined_bcc = list(set(all_bcc + rec_bcc))
 
                 rendered_email = {
                     "object": recipient,
@@ -54,8 +61,8 @@ class AutoMailer:
                     "text_content": rendered.get("text", ""),
                     "html_content": rendered.get("html", None),
                     "attachments": combined_attachments,
-                    "cc": recipient.__dict__.get(cc_field, cc),
-                    "bcc": recipient.__dict__.get(bcc_field, bcc)
+                    "cc": combined_cc,
+                    "bcc": combined_bcc
                 }
 
                 rendered_emails.append(rendered_email)
