@@ -26,6 +26,7 @@ class AutoMailer:
         bcc_field: str = "bcc",
         attachment_field: str = "attachments"
         ):
+        all_attachment_paths = attachment_paths or []
     
         logger.info(f"Preparing to send emails to {len(recipients)} recipients.")
 
@@ -37,11 +38,14 @@ class AutoMailer:
         for recipient in recipients:
             if recipient in sent: 
                 print(f"{recipient.__dict__[email_field]} already sent, skipping.")
-                continue # if recipient is already sent, skip it
+                continue
 
             try:
                 rendered = template.render(recipient)
                 print("Rendered email:", rendered)
+
+                rec_attachments = recipient.__dict__.get(attachment_field) or []
+                combined_attachments = list(set(all_attachment_paths + rec_attachments))
 
                 rendered_email = {
                     "object": recipient,
@@ -49,7 +53,7 @@ class AutoMailer:
                     "subject": rendered.get("subject", ""),
                     "text_content": rendered.get("text", ""),
                     "html_content": rendered.get("html", None),
-                    "attachments": recipient.__dict__.get(attachment_field, attachment_paths),
+                    "attachments": combined_attachments,
                     "cc": recipient.__dict__.get(cc_field, cc),
                     "bcc": recipient.__dict__.get(bcc_field, bcc)
                 }
