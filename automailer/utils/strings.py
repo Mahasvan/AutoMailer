@@ -1,13 +1,13 @@
 import re
 
-ILLEGAL_CHARS_PATTERN = re.compile(r'[^a-zA-z0-9-_]')
+ILLEGAL_CHARS_PATTERN = re.compile(r'[^a-z0-9-_]')
 
 def sanitize_name(name: str) -> str:
     """
     Sanitize a string to be used as a filename.
     Remove illegal characters and replace spaces with underscores.
     
-    Args:
+    Args:`
         name (str): The string to sanitize.
     Returns:
         str: The sanitized string.
