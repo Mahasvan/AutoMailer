@@ -65,9 +65,15 @@ class MailSender:
         if bcc:
             msg["Bcc"] = ", ".join(bcc)
 
-        if text_content:
+        if text_content and html_content:
+            body = MIMEMultipart("alternative")
+            body.attach(MIMEText(text_content, "plain"))
+            body.attach(MIMEText(html_content, "html"))
+            msg.attach(body)
+
+        elif text_content:
             msg.attach(MIMEText(text_content, "plain"))
-        if html_content:
+        elif html_content:
             msg.attach(MIMEText(html_content, "html"))
 
         if attachment_paths:
