@@ -55,7 +55,7 @@ class MailSender:
     ) -> MIMEMultipart:
         
         
-        msg = MIMEMultipart("alternative")
+        msg = MIMEMultipart("mixed")
         msg["From"] = self.sender_email
         msg["To"] = to_email
         if subject:
