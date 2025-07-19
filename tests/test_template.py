@@ -40,7 +40,7 @@ def test_template_engine_render_basic():
         username: str
         email: str
 
-    fields = MyTemplate(username="nitin", email="user@example.com")
+    fields = MyTemplate(username="test", email="user@example.com")
 
     engine = TemplateEngine(
         subject="Welcome, {{ username }}",
@@ -50,9 +50,9 @@ def test_template_engine_render_basic():
 
     result = engine.render(fields)
     
-    assert result["subject"] == "Welcome, nitin"
-    assert result["text"] == "Hello nitin, your email is user@example.com."
-    assert result["html"] == "<b>nitin</b> - user@example.com"
+    assert result["subject"] == "Welcome, test"
+    assert result["text"] == "Hello test, your email is user@example.com."
+    assert result["html"] == "<b>test</b> - user@example.com"
 
 def test_template_engine_partial_template():
     class MyTemplate(TemplateModel):

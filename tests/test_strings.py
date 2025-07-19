@@ -1,5 +1,4 @@
 import re
-import hashlib
 import pytest
 from automailer.utils.strings import sanitize_name, get_hash, get_os_safe_name
 
