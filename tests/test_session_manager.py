@@ -1,22 +1,22 @@
 import pytest
 import os
 from unittest.mock import patch, MagicMock
-from automailer.session_management.session_manager import SessionManager
+from smartmailer.session_management.session_manager import SessionManager
 
 class DummyRecipient:
     def __init__(self, h):
         self.hash_string = h
 
-@patch("automailer.session_management.session_manager.os.path.exists", return_value=False)
-@patch("automailer.session_management.session_manager.os.makedirs")
+@patch("smartmailer.session_management.session_manager.os.path.exists", return_value=False)
+@patch("smartmailer.session_management.session_manager.os.makedirs")
 def test_folder_creation_triggered(mock_makedirs, mock_exists):
-    from automailer.session_management.session_manager import SessionManager
+    from smartmailer.session_management.session_manager import SessionManager
     sm = SessionManager("new_session_test")
     mock_makedirs.assert_called_once()
 
-@patch("automailer.session_management.session_manager.os.path.exists", return_value=True)
+@patch("smartmailer.session_management.session_manager.os.path.exists", return_value=True)
 def test_existing_dbfile_skips_creation(mock_exists):
-    from automailer.session_management.session_manager import SessionManager
+    from smartmailer.session_management.session_manager import SessionManager
     sm = SessionManager("existing_session")
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def dummy_recipients():
 
 @pytest.fixture
 def mock_database():
-    with patch("automailer.session_management.session_manager.Database") as mock_db_class:
+    with patch("smartmailer.session_management.session_manager.Database") as mock_db_class:
         mock_db = MagicMock()
         mock_db_class.return_value = mock_db
         yield mock_db

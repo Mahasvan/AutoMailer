@@ -3,7 +3,7 @@ from sqlalchemy import Table, create_engine, Column
 from sqlalchemy.orm import Session
 import datetime
 from typing import List, Dict, Any
-from automailer.utils.logger import logger
+from smartmailer.utils.logger import logger
 
 class Database:
     _instance = None

@@ -1,7 +1,7 @@
 import pytest
 import json
 from pydantic import ValidationError
-from automailer.core.template import TemplateModel, TemplateEngine, get_placeholder_regex
+from smartmailer.core.template import TemplateModel, TemplateEngine, get_placeholder_regex
 
 def test_template_model_valid_keys():
     class MyTemplate(TemplateModel):

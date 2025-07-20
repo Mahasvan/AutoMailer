@@ -1,12 +1,12 @@
 from tabulate import tabulate
 from typing import List, Dict, Any
-from automailer.session_management.db import Database
-from automailer.utils.strings import get_os_safe_name
+from smartmailer.session_management.db import Database
+from smartmailer.utils.strings import get_os_safe_name
 import os
-from automailer.config import DB_FOLDER
-from automailer.utils.logger import logger
-from automailer.utils.types import TemplateModelType
-from automailer.core.template import TemplateModel
+from smartmailer.config import DB_FOLDER
+from smartmailer.utils.logger import logger
+from smartmailer.utils.types import TemplateModelType
+from smartmailer.core.template import TemplateModel
 
 class SessionManager:
     def __init__(self, session_name: str) -> None:

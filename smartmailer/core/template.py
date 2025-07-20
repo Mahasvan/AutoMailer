@@ -3,7 +3,6 @@ from pydantic import BaseModel, model_validator, computed_field
 import re
 import json
 
-
 def get_placeholder_regex(key) -> re.Pattern:
     pattern = r"\{\{ *KEY *\}\}".replace("KEY", key)
     return re.compile(pattern)

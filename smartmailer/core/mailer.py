@@ -9,10 +9,10 @@ from email.mime.application import MIMEApplication
 import json
 from typing import Optional, Any
 
-from automailer.core.template import TemplateEngine
-from automailer.session_management.session_manager import SessionManager
-from automailer.utils.logger import logger
-from automailer.utils.types import TemplateModelType,  TemplateModel
+from smartmailer.core.template import TemplateEngine
+from smartmailer.session_management.session_manager import SessionManager
+from smartmailer.utils.logger import logger
+from smartmailer.utils.types import TemplateModelType,  TemplateModel
 
 class MailSender:
     def __init__(self, sender_email: str, password: str, provider: str = "gmail") -> None:

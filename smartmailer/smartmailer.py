@@ -1,9 +1,9 @@
-from automailer.core.mailer import MailSender
-from automailer.core.template import TemplateEngine
-from automailer.session_management.session_manager import SessionManager
+from smartmailer.core.mailer import MailSender
+from smartmailer.core.template import TemplateEngine
+from smartmailer.session_management.session_manager import SessionManager
 from typing import List
-from automailer.utils.logger import logger
-from automailer.utils.types import TemplateModelType
+from smartmailer.utils.logger import logger
+from smartmailer.utils.types import TemplateModelType
 
 
 class AutoMailer:
