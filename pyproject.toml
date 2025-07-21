@@ -3,8 +3,8 @@ requires = ["hatchling >= 1.26", "sqlalchemy", "tabulate", "pydantic>=2.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "automailer"
-version = "0.0.3"
+name = "smartmailer"
+version = "0.0.2"
 dependencies = [
     "sqlalchemy",
     "tabulate",

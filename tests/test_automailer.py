@@ -1,13 +1,13 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from automailer.automailer import AutoMailer
+from smartmailer.smartmailer import AutoMailer
 
 
 @pytest.fixture
 def mock_dependencies():
-    with patch("automailer.automailer.MailSender") as mock_mailer_cls, \
-         patch("automailer.automailer.TemplateEngine") as mock_template_cls, \
-         patch("automailer.automailer.SessionManager") as mock_session_cls:
+    with patch("smartmailer.smartmailer.MailSender") as mock_mailer_cls, \
+         patch("smartmailer.smartmailer.TemplateEngine") as mock_template_cls, \
+         patch("smartmailer.smartmailer.SessionManager") as mock_session_cls:
 
         mock_mailer = MagicMock()
         mock_mailer_cls.return_value = mock_mailer

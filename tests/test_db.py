@@ -1,5 +1,5 @@
 import pytest
-from automailer.session_management.db import Database
+from smartmailer.session_management.db import Database
 
 
 @pytest.fixture

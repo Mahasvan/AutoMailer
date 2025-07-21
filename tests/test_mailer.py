@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock, mock_open
-from automailer.core.mailer import MailSender
+from smartmailer.core.mailer import MailSender
 import smtplib
 import builtins
 
@@ -59,7 +59,7 @@ def test_prepare_message_html_only(mock_path, mock_file):
     assert "<b>Only HTML</b>" in msg.as_string()
 
 @patch("os.path.join", return_value="settings.json")
-@patch("automailer.core.mailer.open")
+@patch("smartmailer.core.mailer.open")
 def test_prepare_message_with_attachment(mock_open_func, mock_path):
     def open_side_effect(file, *args, **kwargs):
         if file == "settings.json":
@@ -79,7 +79,7 @@ def test_prepare_message_with_attachment(mock_open_func, mock_path):
     assert "file.txt" in msg.as_string()
 
 @patch("os.path.join", return_value="settings.json")
-@patch("automailer.core.mailer.open")
+@patch("smartmailer.core.mailer.open")
 def test_prepare_message_attachment_failure(mock_open_func, mock_path):
     def open_side_effect(file, *args, **kwargs):
         if file == "settings.json":
@@ -164,7 +164,7 @@ def test_preview_email_output(capsys):
 @patch("os.path.join", return_value="settings.json")
 @patch("smtplib.SMTP")
 @patch("time.sleep", return_value=None)
-@patch("automailer.core.mailer.MailSender.preview_email")
+@patch("smartmailer.core.mailer.MailSender.preview_email")
 @patch("sys.exit")
 def test_send_bulk_mail_basic(mock_exit, mock_preview, mock_sleep, mock_smtp, mock_path, mock_file):
     smtp_instance = mock_smtp.return_value
@@ -196,7 +196,7 @@ def test_send_bulk_mail_basic(mock_exit, mock_preview, mock_sleep, mock_smtp, mo
 
 @patch("smtplib.SMTP")
 @patch("time.sleep", return_value=None)
-@patch("automailer.core.mailer.MailSender.preview_email")
+@patch("smartmailer.core.mailer.MailSender.preview_email")
 @patch("sys.exit")
 def test_keyboard_interrupt_during_loop(mock_exit, mock_preview, mock_sleep, mock_smtp):
     smtp_instance = mock_smtp.return_value
