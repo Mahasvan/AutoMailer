@@ -9,7 +9,7 @@ if not os.path.exists(LOG_DIR):
 log_filename = datetime.now().strftime("log_%Y-%m-%d_%H-%M-%S.log")
 log_path = os.path.join(LOG_DIR, log_filename)
 
-logger = logging.getLogger("AutoMailerLogger")
+logger = logging.getLogger("SmartMailerLogger")
 logger.setLevel(logging.DEBUG)
 
 file_handler = logging.FileHandler(log_path)

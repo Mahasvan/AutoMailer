@@ -52,7 +52,7 @@ def test_logger_handlers_and_formatting():
     importlib.reload(smartmailer.utils.logger)
     logger = smartmailer.utils.logger.logger
 
-    assert logger.name == "AutoMailerLogger"
+    assert logger.name == "SmartMailerLogger"
     assert logger.level == logging.DEBUG
 
     handler_types = [type(h) for h in logger.handlers]

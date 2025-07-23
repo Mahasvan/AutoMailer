@@ -6,12 +6,12 @@ from smartmailer.utils.logger import logger
 from smartmailer.utils.types import TemplateModelType
 
 
-class AutoMailer:
+class SmartMailer:
     def __init__(self, sender_email: str, password: str, provider: str, session_name: str):
-        logger.info(f"Initializing AutoMailer for {sender_email} with provider {provider} and session '{session_name}'")
+        logger.info(f"Initializing SmartMailer for {sender_email} with provider {provider} and session '{session_name}'")
         self.mailer = MailSender(sender_email, password, provider)
         self.session_manager = SessionManager(session_name)
-        # print(f"AutoMailer initialized for {sender_email} with provider {provider} and session '{session_name}'")
+        # print(f"SmartMailer initialized for {sender_email} with provider {provider} and session '{session_name}'")
         # print(f"{len(self.session_manager.get_sent_recipients())} recipients already sent in this session.")
 
     def send_emails(
