@@ -13,7 +13,7 @@ AutoMailer is a Python library for sending bulk emails with support for template
 
 ## Quickstart
 
-Visit [The Documentation Page](DOCS.md)
+Visit [The Documentation Page](https://github.com/Mahasvan/AutoMailer/blob/main/DOCS.md)
 
 <!-- 
 ## Installation
@@ -111,14 +111,14 @@ Logs are handled via the built-in logger and will output to the console. -->
 
 ## So why should I use this library?
 
-The beauty of AutoMailer is that if your machine has an outage halfway through sending, there is no need to change the script in any way.
+The beauty of SmartMailer is that if your machine has an outage halfway through sending, there is no need to change the script in any way.
 You need **no extra configuration** to prevent an email from sending to the same recipient twice.
 
 Just run the script again, with no changes, and our inbuilt progress management system will take care of the rest.
 
 ## License
 
-[MIT License](LICENSE)
+[MIT License](https://github.com/Mahasvan/AutoMailer/blob/main/LICENSE)
 
 
 ## Credits
@@ -128,6 +128,7 @@ This project was brought to life by a squad in the Tech Team of [SSN-SNUC MUN 20
 - [Nilaa](http://github.com/nil-aa)
 - [Kamlesh](http://github.com/Kamlesh-DevOP)
 - [Sharon](http://github.com/sharonprabhu11)
+- [Nitin Karthick](https://github.com/yukii1004)
 - [Mahasvan](http://github.com/Mahasvan)
 
 **Note:** Never hardcode your email password in production code. Use environment variables or secure vaults.
