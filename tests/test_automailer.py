@@ -1,13 +1,13 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from automailer.automailer import AutoMailer
+from smartmailer.smartmailer import SmartMailer
 
 
 @pytest.fixture
 def mock_dependencies():
-    with patch("automailer.automailer.MailSender") as mock_mailer_cls, \
-         patch("automailer.automailer.TemplateEngine") as mock_template_cls, \
-         patch("automailer.automailer.SessionManager") as mock_session_cls:
+    with patch("smartmailer.smartmailer.MailSender") as mock_mailer_cls, \
+         patch("smartmailer.smartmailer.TemplateEngine") as mock_template_cls, \
+         patch("smartmailer.smartmailer.SessionManager") as mock_session_cls:
 
         mock_mailer = MagicMock()
         mock_mailer_cls.return_value = mock_mailer
@@ -35,7 +35,7 @@ def dummy_recipients():
 
 
 def test_send_emails_filters_and_renders(mock_dependencies, dummy_recipients):
-    auto = AutoMailer("sender@example.com", "password", "gmail", "testsession")
+    auto = SmartMailer("sender@example.com", "password", "gmail", "testsession")
 
     mock_session = mock_dependencies["session"]
     mock_mailer = mock_dependencies["mailer"]
@@ -61,7 +61,7 @@ def test_send_emails_filters_and_renders(mock_dependencies, dummy_recipients):
 
 
 def test_send_emails_skips_sent_recipients(mock_dependencies, dummy_recipients):
-    auto = AutoMailer("sender@example.com", "password", "gmail", "testsession")
+    auto = SmartMailer("sender@example.com", "password", "gmail", "testsession")
 
     mock_session = mock_dependencies["session"]
     mock_mailer = mock_dependencies["mailer"]
@@ -79,7 +79,7 @@ def test_send_emails_skips_sent_recipients(mock_dependencies, dummy_recipients):
 
 
 def test_show_sent_prints(mock_dependencies):
-    auto = AutoMailer("sender@example.com", "pass", "gmail", "mysession")
+    auto = SmartMailer("sender@example.com", "pass", "gmail", "mysession")
     mock_session = mock_dependencies["session"]
 
     mock_session.get_sent_recipients.return_value = [
@@ -92,7 +92,7 @@ def test_show_sent_prints(mock_dependencies):
     mock_session.get_sent_recipients.assert_called_once()
 
 def test_rendering_exception_is_logged_and_skipped(mock_dependencies, dummy_recipients, capsys):
-    auto = AutoMailer("sender@example.com", "password", "gmail", "error-session")
+    auto = SmartMailer("sender@example.com", "password", "gmail", "error-session")
 
     mock_template = mock_dependencies["template"]
     mock_mailer = mock_dependencies["mailer"]

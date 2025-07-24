@@ -1,6 +1,6 @@
 import re
 import pytest
-from automailer.utils.strings import sanitize_name, get_hash, get_os_safe_name
+from smartmailer.utils.strings import sanitize_name, get_hash, get_os_safe_name
 
 def test_sanitize_name_invalid():
     assert sanitize_name("Invalid File@Name!.txt") == "invalid_filenametxt"

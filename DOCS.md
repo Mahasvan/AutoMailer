@@ -19,10 +19,16 @@ pip install sqlalchemy tabulate pydantic
 pip install -i https://test.pypi.org/simple/ automailer==0.0.3
 ```
 
+Or,
+
+```shell
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ smartmailer==0.0.2
+```
+
 ### Importing and Using the Library
 
 ```python
-from automailer import AutoMailer, TemplateModel, TemplateEngine
+from smartmailer import SmartMailer, TemplateModel, TemplateEngine
 
 ```
 
@@ -31,7 +37,7 @@ This MySchema class inherits from TemplateModel.
 
 (It's like defining a `Pydantic` model from its `BaseModel` class!)
 
-We have four fields for this example. these four fields will be all we need to build the metadata for our email.
+We have four fields for this example. These four fields will be all we need to build the metadata for our email.
 
 **NOTE**: Make sure to have a field for the **destination email address** (`email` here), as that will be used for the internal email logic.
 You will use this as the `sender_email` argument when calling `send_emails`.
@@ -66,11 +72,11 @@ MUN Allotment Details
 `body.txt`:
 
 ```text
-Hi {{name}}
-
-You have been allotted {{ allotment }} in {{  committee  }}.
-
-Congrats.
+Dear {{ name }},
+Congratulations!! 
+You are assigned to the {{ committee }} committee with the allotment of {{ allotment }}.
+Regards,
+The Organizing Committee
 ```
 
 Let's load them into string objects, and initialize our Template Engine with the required data.
@@ -99,18 +105,18 @@ recipients = [
     {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "myEmail@snuchennai.edu.in"},
 ]
 
-obj_recipients = [MySchema(name=recipient['name'], committee=recipient['country'], ... ) for recipient in recipients]
+obj_recipients = [MySchema(name=recipient['name'], committee=recipient['country'], allotment=recipient['allotment'], email= recipient['email'])  for recipient in recipients]
 ```
 
 ### Sending the Emails
 
-Next, we define the AutoMailer instance which handles the email sending for these recipients.
+Next, we define the AutoMailer instance which handles the email-sending for these recipients.
 We need to provide the source email credentials, as well as the email provider to be used.
 
 Currently supported options are: `"gmail"` and `"outlook"`. (case sensitive).
 
 ```python
-automailer = AutoMailer(
+smartmailer = SmartMailer(
     sender_email="myEmail@gmail.com",
     password="myPass",
     provider="gmail",

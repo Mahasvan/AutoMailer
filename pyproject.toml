@@ -3,7 +3,7 @@ requires = ["hatchling >= 1.26", "sqlalchemy", "tabulate", "pydantic>=2.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "automailer"
+name = "smartmailer"
 version = "0.0.3"
 dependencies = [
     "sqlalchemy",
@@ -24,5 +24,5 @@ license-files = ["LICENSE"]
 
 
 [project.urls]
-Homepage = "https://github.com/Mahasvan/AutoMailer/"
-Issues = "https://github.com/Mahasvan/AutoMailer/issues"
+Homepage = "https://github.com/Mahasvan/SmartMailer/"
+Issues = "https://github.com/Mahasvan/SmartMailer/issues"

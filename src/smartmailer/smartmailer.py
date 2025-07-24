@@ -1,17 +1,17 @@
-from automailer.core.mailer import MailSender
-from automailer.core.template import TemplateEngine
-from automailer.session_management.session_manager import SessionManager
+from smartmailer.core.mailer import MailSender
+from smartmailer.core.template import TemplateEngine
+from smartmailer.session_management.session_manager import SessionManager
 from typing import List
-from automailer.utils.logger import logger
-from automailer.utils.types import TemplateModelType
+from smartmailer.utils.logger import logger
+from smartmailer.utils.types import TemplateModelType
 
 
-class AutoMailer:
+class SmartMailer:
     def __init__(self, sender_email: str, password: str, provider: str, session_name: str):
-        logger.info(f"Initializing AutoMailer for {sender_email} with provider {provider} and session '{session_name}'")
+        logger.info(f"Initializing SmartMailer for {sender_email} with provider {provider} and session '{session_name}'")
         self.mailer = MailSender(sender_email, password, provider)
         self.session_manager = SessionManager(session_name)
-        # print(f"AutoMailer initialized for {sender_email} with provider {provider} and session '{session_name}'")
+        # print(f"SmartMailer initialized for {sender_email} with provider {provider} and session '{session_name}'")
         # print(f"{len(self.session_manager.get_sent_recipients())} recipients already sent in this session.")
 
     def send_emails(
