@@ -1,6 +1,6 @@
-# AutoMailer
+# SmartMailer
 
-AutoMailer is a Python library for sending bulk emails with support for templates, attachments, session management, and logging. It is designed for easy integration into your own projects.
+SmartMailer is a Python library for sending bulk emails with support for templates, attachments, session management, and logging. It is designed for easy integration into your own projects.
 
 ## Features
 
@@ -13,7 +13,7 @@ AutoMailer is a Python library for sending bulk emails with support for template
 
 ## Quickstart
 
-Visit [The Documentation Page](https://github.com/Mahasvan/AutoMailer/blob/main/DOCS.md)
+Visit [The Documentation Page](https://github.com/Mahasvan/SmartMailer/blob/main/DOCS.md)
 
 <!-- 
 ## Installation
@@ -27,7 +27,7 @@ pip install .
 Or add to your `requirements.txt` if published to PyPI:
 
 ```
-AutoMailer
+SmartMailer
 ```
 
 ## Requirements
@@ -42,7 +42,7 @@ AutoMailer
 
 ### 1. Prepare your settings
 
-Edit `AutoMailer/core/settings.json` to include your SMTP provider details:
+Edit `SmartMailer/core/settings.json` to include your SMTP provider details:
 
 ```json
 {
@@ -54,7 +54,7 @@ Edit `AutoMailer/core/settings.json` to include your SMTP provider details:
 ### 2. Example Usage
 
 ```python
-from AutoMailer.automailer import AutoMailer
+from SmartMailer.smartmailer import SmartMailer
 
 # Define your sender credentials and session name
 sender_email = "your_email@gmail.com"
@@ -62,8 +62,8 @@ password = "your_password"
 provider = "gmail"
 session_name = "june_campaign"
 
-# Create an AutoMailer instance
-mailer = AutoMailer(sender_email, password, provider, session_name)
+# Create a SmartMailer instance
+mailer = SmartMailer(sender_email, password, provider, session_name)
 
 # Prepare your recipient list (must include 'email' key)
 recipients = [
@@ -102,7 +102,7 @@ You can use any key from your recipient dictionary as a placeholder in your temp
 
 ### 4. Session Management
 
-AutoMailer tracks which recipients have already been emailed in a session. If you run the script again with the same session name, only new recipients will be emailed.
+SmartMailer tracks which recipients have already been emailed in a session. If you run the script again with the same session name, only new recipients will be emailed.
 
 ## Logging
 
@@ -118,7 +118,7 @@ Just run the script again, with no changes, and our inbuilt progress management 
 
 ## License
 
-[MIT License](https://github.com/Mahasvan/AutoMailer/blob/main/LICENSE)
+[MIT License](https://github.com/Mahasvan/SmartMailer/blob/main/LICENSE)
 
 
 ## Credits
