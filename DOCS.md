@@ -9,14 +9,14 @@ The main purpose of this library is to streamline and standardize template usage
 
 ### Install the Library
 
-The process is not as straightforward as "pip install automailer", and we're working on it!
+The process is not as straightforward as "pip install smartmailer", and we're working on it!
 
 Until then,
 
 ```shell
 pip install sqlalchemy tabulate pydantic
 
-pip install -i https://test.pypi.org/simple/ automailer==0.0.3
+pip install -i https://test.pypi.org/simple/ smartmailer==0.0.3
 ```
 
 Or,
@@ -127,7 +127,7 @@ smartmailer = SmartMailer(
 After that's done, all that's left is to send the emails.
 
 ```python
-automailer.send_emails(
+smartmailer.send_emails(
     recipients=obj_recipients,
     email_field="email",
     template=template
