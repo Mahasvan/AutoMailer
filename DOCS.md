@@ -1,4 +1,4 @@
-# AutoMailer
+# SmartMailer
 
 ## Introduction
 
@@ -110,7 +110,7 @@ obj_recipients = [MySchema(name=recipient['name'], committee=recipient['country'
 
 ### Sending the Emails
 
-Next, we define the AutoMailer instance which handles the email-sending for these recipients.
+Next, we define the SmartMailer instance which handles the email-sending for these recipients.
 We need to provide the source email credentials, as well as the email provider to be used.
 
 Currently supported options are: `"gmail"` and `"outlook"`. (case sensitive).
