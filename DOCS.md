@@ -22,7 +22,7 @@ pip install -i https://test.pypi.org/simple/ smartmailer==0.0.3
 Or,
 
 ```shell
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ smartmailer==0.0.2
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ smartmailer
 ```
 
 ### Importing and Using the Library
@@ -48,6 +48,7 @@ class MySchema(TemplateModel):
     committee: str
     allotment: str
     email: str
+    
 ```
 
 Next up, we define the templates for our subject and body.
@@ -135,3 +136,67 @@ smartmailer.send_emails(
 ```
 
 And we're done!
+
+## Adding CC, BCC, and Attachments
+
+Sometimes, you might want to send emails with CC, BCC, or include attachments. SmartMailer makes this easy — just add the relevant fields to your schema and pass the field names to `send_emails`.
+
+First, update your schema to include optional fields for `cc`, `bcc`, and `attachments`:
+
+```python
+from typing import List, Optional
+
+class MySchema(TemplateModel):
+    name: str
+    committee: str
+    allotment: str
+    email: str
+    cc: Optional[List[str]] = None
+    bcc: Optional[List[str]] = None
+    attachments: Optional[List[str]] = None
+```
+
+When preparing your recipient data, you can now include these fields:
+
+```python
+recipients = [
+    {
+        "name": "Arjun",
+        "committee": "UNDP",
+        "allotment": "India",
+        "email": "arjun@example.com",
+        "cc": ["ccperson@example.com"],
+        "bcc": ["bccperson@example.com"],
+        "attachments": [r"C:\path\to\file.pdf"]
+    },
+    # ... more recipients ...
+]
+
+obj_recipients = [
+    MySchema(
+        name=recipient['name'],
+        committee=recipient['committee'],
+        allotment=recipient['allotment'],
+        email=recipient['email'],
+        cc=recipient.get('cc'),
+        bcc=recipient.get('bcc'),
+        attachments=recipient.get('attachments')
+    )
+    for recipient in recipients
+]
+```
+
+When calling `send_emails`, just specify the field names for CC, BCC, and attachments:
+
+```python
+smartmailer.send_emails(
+    recipients=obj_recipients,
+    email_field="email",
+    template=template,
+    cc_field="cc",
+    bcc_field="bcc",
+    attachment_field="attachments"
+)
+```
+
+That's it! Your emails will now include CC, BCC, and any attachments (all file types supported) you specify for each recipient.
