@@ -91,17 +91,18 @@ class MailSender:
                     self.logger.warning(f"Couldn't attach file '{file_path}': {e}")
         return msg
     
-    async def _create_smtp_connection(self) -> aiosmtplib.SMTP:
+    async def _create_smtp_connection(self):
+
         smtp = aiosmtplib.SMTP(
             hostname=self.smtp_server,
             port=self.smtp_port,
-            use_tls=False,
+            start_tls=True  # automatically upgrades if needed
         )
+
         await smtp.connect()
-        await smtp.starttls()
         await smtp.login(self.sender_email, self.password)
-        return smtp
-        
+
+        return smtp        
             
     async def _send_individual_mail(
         self,
@@ -190,17 +191,20 @@ class MailSender:
             if preview_timer and preview_timer > 0:
                 await asyncio.sleep(preview_timer)
 
-        pool_size = 5
-        semaphore = asyncio.Semaphore(pool_size)
+        pool_size = 10
         connection_queue: asyncio.Queue[aiosmtplib.SMTP] = asyncio.Queue()
 
         self.logger.info(f"Creating SMTP connection pool of size {pool_size}")
 
-        for _ in range(pool_size):
-            smtp = await self._create_smtp_connection()
+        connections = await asyncio.gather(
+            *[self._create_smtp_connection() for i in range(pool_size)]
+        )
+
+        for smtp in connections:
             await connection_queue.put(smtp)
 
         self.logger.info("SMTP connection pool ready.")
+
 
         async def worker(row: Dict[str, Any]):
 
@@ -209,51 +213,49 @@ class MailSender:
                 self.logger.error(f"Invalid 'to_email': {to_email}. Skipping.")
                 return
 
-            async with semaphore:
-                smtp = await connection_queue.get()
+            smtp = await connection_queue.get()
+
+            try:
+
+                recipients_list = [to_email]
+
+                row_cc = row.get("cc", cc)
+                row_bcc = row.get("bcc", bcc)
+
+                if row_cc:
+                    recipients_list.extend(row_cc)
+                if row_bcc:
+                    recipients_list.extend(row_bcc)
+
+                msg = self.prepare_message(
+                    to_email=to_email,
+                    subject=row.get("subject"),
+                    text_content=row.get("text_content"),
+                    html_content=row.get("html_content"),
+                    attachment_paths=row.get("attachments", attachment_paths),
+                    cc=row_cc,
+                    bcc=None,
+                )
+
+                await smtp.send_message(msg, recipients=recipients_list)
+
+                self.logger.info(f"Email sent to {to_email} successfully.")
+
+                if session_manager:
+                    session_manager.add_recipient(row["object"])
+
+            except Exception as e:
+                self.logger.error(f"Error sending email to {to_email}: {e}")
 
                 try:
+                    await smtp.quit()
+                except Exception:
+                    pass
 
-                    recipients_list = [to_email]
+                smtp = await self._create_smtp_connection()
 
-                    row_cc = row.get("cc", cc)
-                    row_bcc = row.get("bcc", bcc)
-
-                    if row_cc:
-                        recipients_list.extend(row_cc)
-                    if row_bcc:
-                        recipients_list.extend(row_bcc)
-
-
-                    msg = self.prepare_message(
-                        to_email=to_email,
-                        subject=row.get("subject"),
-                        text_content=row.get("text_content"),
-                        html_content=row.get("html_content"),
-                        attachment_paths=row.get("attachments", attachment_paths),
-                        cc=row_cc,
-                        bcc=None,
-                    )
-
-                    await smtp.send_message(msg, recipients=recipients_list)
-
-                    self.logger.info(f"Email sent to {to_email} successfully.")
-
-                    if session_manager:
-                        session_manager.add_recipient(row["object"])
-
-                except Exception as e:
-                    self.logger.error(f"Error sending email to {to_email}: {e}")
-
-                    try:
-                        await smtp.quit()
-                    except Exception:
-                        pass
-
-                    smtp = await self._create_smtp_connection()
-
-                finally:
-                    await connection_queue.put(smtp)
+            finally:
+                await connection_queue.put(smtp)
 
 
         tasks = [worker(row) for row in recipients]
@@ -270,3 +272,6 @@ class MailSender:
                 pass
 
         self.logger.info("All SMTP connections closed.")
+
+        if session_manager:
+            session_manager.db_op.shutdown()

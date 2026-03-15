@@ -102,5 +102,7 @@ class Database:
             self.meta = None
     
     def __del__(self):
-        self.close()
-        self.logger.info("Database connection closed.")
+        try:
+            self.close()
+        except Exception:
+            pass

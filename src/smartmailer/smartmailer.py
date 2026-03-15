@@ -62,6 +62,10 @@ class SmartMailer:
                 "bcc": recipient.__dict__.get(bcc_field) or [],
             })
 
+        if not rendered_emails:
+            self.logger.info("No emails to send")
+            return
+
         self.mailer.send_bulk_mail(
             recipients=rendered_emails,
             session_manager=self.session_manager,
