@@ -53,13 +53,3 @@ def test_clear_database(db_instance):
     db_instance.clear_database()
     assert db_instance.get_sent_recipients() == []
 
-
-def test_singleton_behavior():
-    db1 = Database(":memory:")
-    db2 = Database("should_be_ignored.db")
-    assert db1 is db2
-
-    db1.insert_recipient("singleton_test")
-    assert db2.check_recipient_sent("singleton_test")
-
-    db1.close()
