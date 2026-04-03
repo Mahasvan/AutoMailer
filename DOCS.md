@@ -10,7 +10,7 @@ SmartMailer is a Python library for bulk email delivery with:
 - Concurrent SMTP delivery using an async connection pool
 - Optional per-recipient or global CC, BCC, and attachments
 
-The current package version is `1.0.0`.
+The current package version is `2.0.0`.
 
 ## Installation
 
