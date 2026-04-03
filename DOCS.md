@@ -1,137 +1,214 @@
-# SmartMailer
+# SmartMailer Documentation
 
-## Introduction
+## Overview
 
-This is a library that makes it easy to handle mass-emailing on a large scale.
-The main purpose of this library is to streamline and standardize template usage, and to assist in crash recovery by incorporating state management.
+SmartMailer is a Python library for bulk email delivery with:
 
-## Usage
+- Jinja2-powered subject, text, and HTML templates
+- Pydantic-backed recipient models
+- Session tracking to avoid duplicate sends across reruns
+- Concurrent SMTP delivery using an async connection pool
+- Optional per-recipient or global CC, BCC, and attachments
 
-### Install the Library
+The current package version is `1.0.0`.
 
-The process is not as straightforward as "pip install smartmailer", and we're working on it!
+## Installation
 
-Until then,
+### Requirements
 
-```shell
-pip install sqlalchemy tabulate pydantic jinja2
+- Python `3.9+`
+- An SMTP account supported by SmartMailer's provider settings
 
-pip install -i https://test.pypi.org/simple/ smartmailer==0.0.3
+### Install from the project
+
+```bash
+pip install .
 ```
 
-Or,
+For local development:
 
-```shell
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ smartmailer
+```bash
+pip install -e .
 ```
 
-### Gmail App Password Setup
+### Runtime dependencies
 
-To send emails using Gmail, you need to generate an **App Password** instead of your regular Gmail password. Follow these steps:
+SmartMailer currently depends on:
 
-1. **Enable 2-Step Verification**
-   - Go to your [Google Account Security Settings](https://myaccount.google.com/security)
-   - Click on "2-Step Verification" and follow the prompts to enable it
+- `sqlalchemy`
+- `tabulate`
+- `pydantic>=2.0`
+- `aiosmtplib`
+- `jinja2`
+- `threading`
 
-2. **Generate an App Password**
-   - After enabling 2-Step Verification, go to [App Passwords](https://myaccount.google.com/apppasswords)
-   - Select "Mail" as the app and "Other (Custom Name)" as the device
-   - Name it something like "SmartMailer"
-   - Click "Generate" and copy the 16-character password shown
+## Supported Providers
 
-3. **Use the App Password in SmartMailer**
-   - Use this 16-character password (without spaces) as the `password` argument when initializing `SmartMailer`
+SmartMailer reads SMTP settings from `src/smartmailer/core/settings.json`.
 
-**NOTE**: App Passwords can only be generated if 2-Step Verification is enabled on your Google account. Keep your App Password secure and do not share it.
+At the moment, the bundled providers are:
 
-### Importing and Using the Library
+- `gmail`
+- `outlook`
+
+The `provider` argument must match one of those keys exactly.
+
+## Gmail Setup
+
+If you use Gmail, use a Google App Password instead of your normal account password.
+
+1. Enable 2-Step Verification in your Google account.
+2. Open <https://myaccount.google.com/apppasswords>.
+3. Create an app password for mail usage.
+4. Pass that 16-character password to SmartMailer.
+
+## Quick Start
 
 ```python
-from smartmailer import SmartMailer, TemplateModel, TemplateEngine
-from smartmailer.core.template import JinjaTemplateParser, JinjaTemplateRenderer, TemplateValidator
 from jinja2 import Environment
 
-```
+from smartmailer import SmartMailer, TemplateEngine, TemplateModel
+from smartmailer.core.template import (
+    JinjaTemplateParser,
+    JinjaTemplateRenderer,
+    TemplateValidator,
+)
 
-After importing, we need to define a schema for our data model.
-This MySchema class inherits from TemplateModel.
 
-(It's like defining a `Pydantic` model from its `BaseModel` class!)
-
-We have four fields for this example. These four fields will be all we need to build the metadata for our email.
-
-**NOTE**: Make sure to have a field for the **destination email address** (`email` here), as that will be used for the internal email logic.
-You will use this as the `sender_email` argument when calling `send_emails`.
-
-```python
-class MySchema(TemplateModel):
+class Recipient(TemplateModel):
     name: str
     committee: str
     allotment: str
     email: str
-    
-```
 
-Next up, we define the templates for our subject and body.
 
-### Defining Templates
+subject = "MUN Allotment Details"
+text_body = """Dear {{ name }},
 
-SmartMailer uses **Jinja2** for templating. Jinja2 is a powerful templating engine that allows you to use variables, conditionals, loops, and more.
-
-- Template variables are defined using **Double Curly Braces**: `{{ variable_name }}`
-- Variable names correspond to the `MySchema` fields you defined previously.
-- Whitespaces between the variable name and the curly braces are optional, but we recommend them for better readability.
-
-**NOTE**: Variable names must match the field names in your schema exactly. All field names **must be lowercase Python identifiers** (e.g., `name`, `email`, `committee_name`). Uppercase characters or special characters will cause validation errors.
-
-Now, let's define the templates for the subject and body in these two files:
-
-`subject.txt`:
-
-```text
-MUN Allotment Details
-```
-
-`body.txt`:
-
-```text
-Dear {{ name }},
-Congratulations!! 
+Congratulations.
 You are assigned to the {{ committee }} committee with the allotment of {{ allotment }}.
+
 Regards,
 The Organizing Committee
-```
+"""
 
-Let's load them into string objects, and initialize our Template Engine with the required components.
+html_body = """
+<html>
+  <body>
+    <p>Dear {{ name }},</p>
+    <p>
+      You are assigned to the <strong>{{ committee }}</strong> committee
+      with the allotment of <strong>{{ allotment }}</strong>.
+    </p>
+  </body>
+</html>
+"""
 
-```python
-with open("body.txt", "r") as f:
-    body = f.read()
-
-with open("subject.txt", "r") as f:
-    subject = f.read()
-
-# Create Jinja2 environment
 env = Environment()
 
-# Initialize the template components
-parser = JinjaTemplateParser(env)
-renderer = JinjaTemplateRenderer(env)
-validator = TemplateValidator()
-
-# Create the template engine with all components
 template = TemplateEngine(
-    parser=parser,
-    validator=validator,
-    renderer=renderer,
+    parser=JinjaTemplateParser(env),
+    validator=TemplateValidator(),
+    renderer=JinjaTemplateRenderer(env),
     subject=subject,
-    text=body
+    text=text_body,
+    html=html_body,
+)
+
+recipients = [
+    Recipient(
+        name="John",
+        committee="UNDP",
+        allotment="India",
+        email="john@gmail.com",
+    ),
+    Recipient(
+        name="John",
+        committee="UNDP",
+        allotment="USA",
+        email="john@outlook.com",
+    ),
+]
+
+mailer = SmartMailer(
+    sender_email="your_email@gmail.com",
+    password="your-app-password",
+    provider="gmail",
+    session_name="mun-allotments",
+    log_to_file=False,
+    log_level="WARNING",
+)
+
+mailer.send_emails(
+    recipients=recipients,
+    email_field="email",
+    template=template,
+    show_preview=True,
+    preview_count=5,
 )
 ```
 
-### Advanced Jinja2 Features
+## Core Concepts
 
-**Conditionals:**
+### `TemplateModel`
+
+Recipients should be defined using `TemplateModel`, which is built on top of Pydantic.
+
+```python
+class Recipient(TemplateModel):
+    name: str
+    email: str
+```
+
+Important behavior:
+
+- Field names must be lowercase Python identifiers.
+- Template validation uses your model fields as the allowed variable set.
+- Each recipient gets a computed `hash_string`, which SmartMailer uses for session tracking.
+
+### `TemplateEngine`
+
+`TemplateEngine` coordinates three responsibilities:
+
+- parsing variables from templates
+- validating them against the model schema
+- rendering the final subject/body
+
+You can provide any combination of:
+
+- `subject`
+- `text`
+- `html`
+
+At least one of `text` or `html` should render to non-empty content before sending.
+
+### Jinja components
+
+The standard setup is:
+
+```python
+env = Environment()
+
+parser = JinjaTemplateParser(env)
+renderer = JinjaTemplateRenderer(env)
+validator = TemplateValidator()
+```
+
+## Template Rules
+
+SmartMailer uses Jinja2 syntax:
+
+- variables: `{{ name }}`
+- conditionals: `{% if allotment %}...{% endif %}`
+- loops: `{% for item in items %}...{% endfor %}`
+- filters: `{{ email | lower }}`
+
+Validation is fail-fast:
+
+- if a template references a field not present on your `TemplateModel`, rendering raises an error
+- SmartMailer logs that recipient's rendering failure and skips that recipient
+
+Example:
 
 ```text
 Dear {{ name }},
@@ -142,172 +219,183 @@ Your allotment is pending.
 {% endif %}
 ```
 
-**Loops (if your data contains lists):**
+## Loading Template Files
 
-```text
-Your committees:
-{% for item in committees %}
-- {{ item }}
-{% endfor %}
-```
-
-**Filters:**
-
-```text
-Dear {{ name | upper }},
-Your email is: {{ email | lower }}
-```
-
-## Loading Data
-
-The list of recipients is expected to be a list of `MySchema` objects, where we defined `MySchema` previously.
-From whatever data source you have, convert the data into the schema that you defined.
-
-In this example, my datasource is a list of dictionaries, for convenience.
+You can load templates from files before building the engine:
 
 ```python
-recipients = [
-    {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "myEmail@gmail.com"},
-    {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "myEmail@outlook.com"},
-    {"name": "John", "committee": "ECOSOC", "allotment": "Algeria", "email": "myEmail@snuchennai.edu.in"},
-]
+with open("subject.txt", "r", encoding="utf-8") as f:
+    subject = f.read()
 
-obj_recipients = [MySchema(name=recipient['name'], committee=recipient['committee'], allotment=recipient['allotment'], email= recipient['email'])  for recipient in recipients]
+with open("body.txt", "r", encoding="utf-8") as f:
+    body = f.read()
 ```
 
-### Sending the Emails
+Then pass those strings into `TemplateEngine`.
 
-Next, we define the SmartMailer instance which handles the email-sending for these recipients.
-We need to provide the source email credentials, as well as the email provider to be used.
+## Sending Emails
 
-Currently supported options are: `"gmail"` and `"outlook"`. (case sensitive).
-
-```python
-smartmailer = SmartMailer(
-    sender_email="myEmail@gmail.com",
-    password="your-16-char-app-password",  # Use App Password for Gmail
-    provider="gmail",
-    session_name="test"
-)
-```
-
-After that's done, all that's left is to send the emails.
+### Basic send
 
 ```python
-smartmailer.send_emails(
-    recipients=obj_recipients,
+mailer.send_emails(
+    recipients=recipients,
     email_field="email",
-    template=template
+    template=template,
 )
 ```
 
-And we're done!
-
-## Adding CC, BCC, and Attachments
-
-Sometimes, you might want to send emails with CC, BCC, or include attachments. SmartMailer makes this easy — just add the relevant fields to your schema and pass the field names to `send_emails`.
-
-First, update your schema to include optional fields for `cc`, `bcc`, and `attachments`:
+### Method signature
 
 ```python
-from typing import List, Optional
-
-class MySchema(TemplateModel):
-    name: str
-    committee: str
-    allotment: str
-    email: str
-    cc: Optional[List[str]] = None
-    bcc: Optional[List[str]] = None
-    attachments: Optional[List[str]] = None
+send_emails(
+    recipients,
+    email_field,
+    template,
+    attachment_paths=None,
+    cc=None,
+    bcc=None,
+    cc_field="cc",
+    bcc_field="bcc",
+    attachment_field="attachments",
+    show_preview=True,
+    preview_count=5,
+)
 ```
 
-When preparing your recipient data, you can now include these fields:
+### What the arguments do
+
+- `recipients`: list of `TemplateModel` instances
+- `email_field`: model field containing the destination email address
+- `template`: configured `TemplateEngine`
+- `attachment_paths`: global attachments added to all outgoing emails unless overridden per recipient
+- `cc`: global CC recipients
+- `bcc`: global BCC recipients
+- `cc_field`: recipient model field used for per-recipient CC values
+- `bcc_field`: recipient model field used for per-recipient BCC values
+- `attachment_field`: recipient model field used for per-recipient attachments
+- `show_preview`: prints the first rendered email before sending starts
+- `preview_count`: wait time in seconds before sending begins after preview
+
+## Concurrency Model
+
+SmartMailer sends bulk mail concurrently.
+
+Current behavior in `MailSender`:
+
+- an async SMTP connection pool is created
+- the pool size is fixed at `10`
+- each recipient is sent by a worker coroutine
+- failed connections are recreated and returned to the pool
+
+This means SmartMailer is designed to process multiple emails in parallel instead of sending strictly one-by-one.
+
+Practical notes:
+
+- if your SMTP provider has rate limits, send carefully
+- the preview delay happens before the concurrent send phase starts
+- session tracking still records recipients individually as sends succeed
+
+## Session Tracking and Crash Recovery
+
+SmartMailer stores session data in:
+
+```text
+mail_sessions/
+```
+
+How it works:
+
+- each `session_name` gets its own database file
+- sent recipients are tracked using the recipient model's `hash_string`
+- rerunning the same session skips recipients already marked as sent
+
+This is what makes crash recovery simple: rerun the script with the same `session_name`, and SmartMailer avoids resending recipients already completed in that session.
+
+You can inspect sent entries with:
+
+```python
+mailer.show_sent()
+```
+
+## CC, BCC, and Attachments
+
+You can define these per recipient by adding optional fields to your model.
+
+```python
+from typing import Optional
+
+
+class Recipient(TemplateModel):
+    name: str
+    email: str
+    cc: Optional[list[str]] = None
+    bcc: Optional[list[str]] = None
+    attachments: Optional[list[str]] = None
+```
+
+Example usage:
 
 ```python
 recipients = [
-    {
-        "name": "Arjun",
-        "committee": "UNDP",
-        "allotment": "India",
-        "email": "arjun@example.com",
-        "cc": ["ccperson@example.com"],
-        "bcc": ["bccperson@example.com"],
-        "attachments": [r"C:\path\to\file.pdf"]
-    },
-    # ... more recipients ...
-]
-
-obj_recipients = [
-    MySchema(
-        name=recipient['name'],
-        committee=recipient['committee'],
-        allotment=recipient['allotment'],
-        email=recipient['email'],
-        cc=recipient.get('cc'),
-        bcc=recipient.get('bcc'),
-        attachments=recipient.get('attachments')
+    Recipient(
+        name="Arjun",
+        email="arjun@example.com",
+        cc=["mentor@example.com"],
+        bcc=["audit@example.com"],
+        attachments=[r"C:\files\invite.pdf"],
     )
-    for recipient in recipients
 ]
-```
 
-When calling `send_emails`, just specify the field names for CC, BCC, and attachments:
-
-```python
-smartmailer.send_emails(
-    recipients=obj_recipients,
+mailer.send_emails(
+    recipients=recipients,
     email_field="email",
     template=template,
     cc_field="cc",
     bcc_field="bcc",
-    attachment_field="attachments"
+    attachment_field="attachments",
 )
 ```
 
-That's it! Your emails will now include CC, BCC, and any attachments (all file types supported) you specify for each recipient.
+Notes:
+
+- per-recipient attachment fields are read from each model instance
+- global `cc`, `bcc`, and `attachment_paths` can still be passed directly to `send_emails`
+- BCC recipients are used during delivery, but SmartMailer does not place a `Bcc` header into the message in the async bulk path
 
 ## HTML Emails
 
-SmartMailer supports sending HTML emails alongside plain text. When creating your template engine, you can specify both `text` and `html` content:
+If both `text` and `html` are provided, SmartMailer builds a multipart email with both representations.
+
+If only one is provided, that one is sent.
 
 ```python
-html_body = """
-<html>
-<body>
-    <h1>Welcome, {{ name }}!</h1>
-    <p>You are assigned to the <strong>{{ committee }}</strong> committee.</p>
-    <p>Your allotment: <em>{{ allotment }}</em></p>
-</body>
-</html>
-"""
-
 template = TemplateEngine(
     parser=parser,
     validator=validator,
     renderer=renderer,
-    subject=subject,
-    text=body,
-    html=html_body
+    subject="Welcome {{ name }}",
+    text="Hello {{ name }}",
+    html="<p>Hello <strong>{{ name }}</strong></p>",
 )
 ```
 
-When both `text` and `html` are provided, the email will be sent as a multipart message, allowing email clients to display whichever format they prefer.
+## Logging
 
-## Outlook Configuration
+`SmartMailer` accepts:
 
-For Outlook/Hotmail accounts, use the following configuration:
+- `log_to_file`
+- `log_level`
+
+Example:
 
 ```python
-smartmailer = SmartMailer(
-    sender_email="myEmail@outlook.com",
-    password="your-outlook-password",
-    provider="outlook",
-    session_name="outlook-session"
+mailer = SmartMailer(
+    sender_email="your_email@gmail.com",
+    password="your-app-password",
+    provider="gmail",
+    session_name="batch-01",
+    log_to_file=True,
+    log_level="INFO",
 )
 ```
-
-**NOTE**: For personal Outlook accounts, you may need to enable SMTP in your Outlook settings:
-1. Go to [Outlook Settings](https://outlook.live.com/mail/0/options/mail/accounts)
-2. Navigate to "Sync email"
-3. Enable "Let devices and apps use POP" (this also enables SMTP)
